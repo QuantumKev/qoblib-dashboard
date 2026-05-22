@@ -50,6 +50,38 @@ export type IBMRunResponse = {
   bestEnergyEstimate: number
   topCounts: Record<string, number>
   note: string
+  parameterCount?: number
+  approxCircuitDepth?: number
+  searchSpaceSize?: number
+  error?: string
+}
+
+export type ExploreRunRecord = {
+  id: string
+  kind: 'qaoa' | 'qubo'
+  label: string
+  variables: number
+  runtimeSec: number
+  objective?: number
+  gapPct?: number | null
+  qubits?: number
+  reps?: number
+  shots?: number
+  lambda?: number
+  backend?: string
+}
+
+export type LambdaSweepRow = {
+  problemId?: string
+  lambda?: number
+  numVariables?: number
+  assets?: number
+  periods?: number
+  objective?: number
+  runtimeSec?: number
+  referenceObjective?: number | null
+  gapPct?: number | null
+  error?: string
 }
 
 export type VerifyResponse = {

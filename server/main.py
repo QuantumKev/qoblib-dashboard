@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 
 from portfolio_qubo import solve_simulated_annealing
 from problem_ids import find_submission
+from qaoa_demo import estimate_problem_stats, qaoa_ring_circuit
 from qubo_parser import load_qs
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -51,8 +52,25 @@ class IBMRunRequest(BaseModel):
     crn: str
     channel: str = "ibm_quantum_platform"
     backend: str = Field(description="Backend name or 'simulator'")
+    qubits: int = Field(default=4, ge=2, le=20, description="Ring MaxCut qubits (even sizes work best)")
     shots: int = Field(default=1024, ge=100, le=10000)
     reps: int = Field(default=2, ge=1, le=5)
+
+
+class IBMSweepRequest(BaseModel):
+    token: str = ""
+    crn: str = ""
+    channel: str = "ibm_quantum_platform"
+    backend: str = "simulator"
+    qubit_sizes: list[int] = Field(default=[4, 6, 8, 10, 12])
+    shots: int = Field(default=512, ge=100, le=5000)
+    reps: int = Field(default=2, ge=1, le=5)
+
+
+class QuboSweepRequest(BaseModel):
+    instance_key: str = Field(description="e.g. po_a010_t10_s01")
+    iterations: int = Field(default=2500, ge=500, le=15000)
+    seed: int | None = 42
 
 
 class VerifyRequest(BaseModel):
@@ -106,23 +124,81 @@ def _get_service(token: str, crn: str, channel: str):
     return QiskitRuntimeService(channel=channel, token=token, instance=crn)
 
 
-def _demo_qaoa_circuit(reps: int = 2):
-    """Small 4-node ring MaxCut/QUBO demo (~4 qubits) suitable for real QPU warmup."""
+def _demo_qaoa_circuit(reps: int = 2, qubits: int = 4):
+    """n-qubit ring MaxCut QAOA — scalable for teaching (simulator or small n on QPU)."""
+    if qubits % 2 != 0 and qubits > 4:
+        qubits += 1  # prefer even ring sizes
     try:
-        from qiskit.circuit.library import QAOAAnsatz
-        from qiskit.quantum_info import SparsePauliOp
+        return qaoa_ring_circuit(qubits=qubits, reps=reps)
     except ImportError as exc:
         raise HTTPException(status_code=500, detail="Qiskit not installed") from exc
 
-    # 4-node ring MaxCut: edges (0,1), (1,2), (2,3), (3,0)
-    cost = SparsePauliOp.from_list([
-        ("ZZII", 0.5),
-        ("IZZI", 0.5),
-        ("IIZZ", 0.5),
-        ("ZIZI", 0.5),
-    ])
-    ansatz = QAOAAnsatz(cost, reps=reps)
-    return ansatz, cost
+
+def _run_qaoa_job(body: IBMRunRequest):
+    """Shared QAOA execution for single run and sweeps."""
+    ansatz, cost = _demo_qaoa_circuit(body.reps, body.qubits)
+    stats = estimate_problem_stats(body.qubits, body.reps)
+    is_sim = body.backend.lower() in {"simulator", "aer", "local"}
+
+    if not is_sim and body.qubits > 12:
+        raise HTTPException(
+            status_code=400,
+            detail=f"{body.qubits} qubits exceeds the lab hardware cap of 12 for teaching runs. Use simulator or reduce qubits.",
+        )
+
+    t0 = time.perf_counter()
+    if is_sim:
+        from qiskit_aer import AerSimulator
+        from qiskit import transpile
+
+        qc = ansatz.assign_parameters([0.6] * ansatz.num_parameters)
+        qc.measure_all()
+        sim = AerSimulator()
+        compiled = transpile(qc, sim)
+        result = sim.run(compiled, shots=body.shots).result()
+        counts = result.get_counts()
+    else:
+        from qiskit_ibm_runtime import SamplerV2 as Sampler
+        from qiskit import transpile
+
+        service = _get_service(body.token, body.crn, body.channel)
+        backend = service.backend(body.backend)
+        qc = ansatz.assign_parameters([0.6] * ansatz.num_parameters)
+        qc.measure_all()
+        compiled = transpile(qc, backend)
+        sampler = Sampler(backend)
+        job = sampler.run([compiled], shots=body.shots)
+        pub_result = job.result()[0]
+        counts = pub_result.join_data().get_counts()
+
+    elapsed = time.perf_counter() - t0
+    best_bitstring = max(counts, key=counts.get)
+    best_energy = _estimate_energy(best_bitstring, cost)
+
+    hw_note = ""
+    if not is_sim:
+        hw_note = " Real QPU — noise rises quickly as qubits and reps increase."
+    elif body.qubits >= 10:
+        hw_note = " Simulator only at this size; portfolio QUBOs need thousands of variables."
+
+    return {
+        "jobType": f"QAOA ring MaxCut ({body.qubits} qubits)",
+        "qubits": ansatz.num_qubits,
+        "backend": body.backend,
+        "shots": body.shots,
+        "reps": body.reps,
+        "runtimeSec": round(elapsed, 3),
+        "bestBitstring": best_bitstring,
+        "bestEnergyEstimate": best_energy,
+        "topCounts": dict(sorted(counts.items(), key=lambda x: -x[1])[:8]),
+        "parameterCount": stats["parameterCount"],
+        "approxCircuitDepth": stats["approxCircuitDepth"],
+        "searchSpaceSize": stats["searchSpaceSize"],
+        "note": (
+            f"Search space = 2^{body.qubits} = {stats['searchSpaceSize']:,} bitstrings. "
+            f"QAOA uses {stats['parameterCount']} variational parameters.{hw_note}"
+        ),
+    }
 
 
 @app.get("/api/health")
@@ -152,53 +228,40 @@ def ibm_connect(body: IBMConnectRequest):
 
 @app.post("/api/ibm/run-demo")
 def ibm_run_demo(body: IBMRunRequest):
-    """Run a small QAOA demo (QOBLIB workforce warmup — 4-qubit ring MaxCut)."""
-    t0 = time.perf_counter()
-    ansatz, cost = _demo_qaoa_circuit(body.reps)
-
+    """Run scalable QAOA ring MaxCut — increase qubits to explore combinatorial growth."""
     try:
-        if body.backend.lower() in {"simulator", "aer", "local"}:
-            from qiskit_aer import AerSimulator
-            from qiskit import transpile
-
-            qc = ansatz.assign_parameters([0.6] * ansatz.num_parameters)
-            qc.measure_all()
-            sim = AerSimulator()
-            compiled = transpile(qc, sim)
-            result = sim.run(compiled, shots=body.shots).result()
-            counts = result.get_counts()
-        else:
-            from qiskit_ibm_runtime import SamplerV2 as Sampler
-            from qiskit import transpile
-
-            service = _get_service(body.token, body.crn, body.channel)
-            backend = service.backend(body.backend)
-            qc = ansatz.assign_parameters([0.6] * ansatz.num_parameters)
-            qc.measure_all()
-            compiled = transpile(qc, backend)
-            sampler = Sampler(backend)
-            job = sampler.run([compiled], shots=body.shots)
-            pub_result = job.result()[0]
-            counts = pub_result.join_data().get_counts()
+        return _run_qaoa_job(body)
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=400, detail=f"Job failed: {exc}") from exc
 
-    elapsed = time.perf_counter() - t0
-    best_bitstring = max(counts, key=counts.get)
-    best_energy = _estimate_energy(best_bitstring, cost)
 
-    return {
-        "jobType": "QAOA demo (4-qubit ring MaxCut)",
-        "qubits": ansatz.num_qubits,
-        "backend": body.backend,
-        "shots": body.shots,
-        "reps": body.reps,
-        "runtimeSec": round(elapsed, 3),
-        "bestBitstring": best_bitstring,
-        "bestEnergyEstimate": best_energy,
-        "topCounts": dict(sorted(counts.items(), key=lambda x: -x[1])[:8]),
-        "note": "Portfolio-scale QOBLIB instances require hybrid/classical workflows. This demo validates IBM connectivity for workforce labs.",
-    }
+@app.post("/api/ibm/sweep-qubits")
+def ibm_sweep_qubits(body: IBMSweepRequest):
+    """Run the same QAOA demo across multiple qubit counts (simulator recommended)."""
+    if body.backend.lower() not in {"simulator", "aer", "local"} and (not body.token or not body.crn):
+        raise HTTPException(status_code=400, detail="Hardware sweeps require token and CRN")
+
+    sizes = sorted({max(2, min(20, q)) for q in body.qubit_sizes})[:8]
+    rows = []
+    for n in sizes:
+        run_body = IBMRunRequest(
+            token=body.token,
+            crn=body.crn,
+            channel=body.channel,
+            backend=body.backend,
+            qubits=n,
+            shots=body.shots,
+            reps=body.reps,
+        )
+        try:
+            result = _run_qaoa_job(run_body)
+            rows.append(result)
+        except HTTPException as exc:
+            rows.append({"qubits": n, "error": exc.detail})
+
+    return {"sweep": rows, "count": len(rows)}
 
 
 def _estimate_energy(bitstring: str, cost) -> float:
@@ -359,3 +422,69 @@ def large_instances():
         abs2 = [s for s in subs if s.get("solver") == "ABS2"][:8]
         out.append({**inst, "baselineCount": len(subs), "abs2Samples": abs2})
     return {"instances": out}
+
+
+@app.post("/api/portfolio/sweep-lambda")
+def sweep_lambda(body: QuboSweepRequest):
+    """Solve every downloaded λ for one instance — shows how risk parameter changes runtime and objective."""
+    catalog = _load_catalog()
+    entries = [
+        e
+        for e in catalog.get("entries", [])
+        if e.get("instanceKey") == body.instance_key and e.get("localAvailable")
+    ]
+    if not entries:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No local QUBO files for {body.instance_key}. Run fetch_qubo_files.py for that instance family.",
+        )
+
+    entries.sort(key=lambda e: e.get("lambda", 0))
+    rows = []
+    for entry in entries:
+        try:
+            full_path = _resolve_qs_path(entry["qsPath"])
+            model = load_qs(full_path)
+            result = solve_simulated_annealing(model, iterations=body.iterations, seed=body.seed)
+            abs2 = _find_baseline(entry["problemId"], solver="ABS2")
+            ref = float(abs2["objective"]) if abs2 and abs2.get("objective") is not None else None
+            gap = abs((result.objective - ref) / ref) * 100 if ref else None
+            rows.append(
+                {
+                    "problemId": entry["problemId"],
+                    "lambda": entry["lambda"],
+                    "numVariables": entry["numVariables"],
+                    "assets": entry["assets"],
+                    "periods": entry["periods"],
+                    "objective": result.objective,
+                    "runtimeSec": result.runtime_sec,
+                    "referenceObjective": ref,
+                    "gapPct": round(gap, 2) if gap is not None and math.isfinite(gap) else None,
+                }
+            )
+        except HTTPException as exc:
+            rows.append({"problemId": entry.get("problemId"), "lambda": entry.get("lambda"), "error": exc.detail})
+
+    return {"instanceKey": body.instance_key, "iterations": body.iterations, "sweep": rows}
+
+
+@app.get("/api/explore/variable-scale")
+def variable_scale():
+    """Teaching curve — how QOBLIB portfolio QUBO size grows with assets and periods."""
+    return {
+        "formula": "Binary variables grow with assets × periods × encoding overhead (see QOBLIB Table 5)",
+        "instances": [
+            {"label": "a010_t10", "assets": 10, "periods": 10, "variables": 710, "feasibleOnQPU": False},
+            {"label": "a010_t15", "assets": 10, "periods": 15, "variables": 1065, "feasibleOnQPU": False},
+            {"label": "a050_t10", "assets": 50, "periods": 10, "variables": 3110, "feasibleOnQPU": False},
+            {"label": "a050_t15", "assets": 50, "periods": 15, "variables": 4665, "feasibleOnQPU": False},
+            {"label": "a200_t10", "assets": 200, "periods": 10, "variables": 12110, "feasibleOnQPU": False},
+            {"label": "a200_t15", "assets": 200, "periods": 15, "variables": 18165, "feasibleOnQPU": False},
+            {"label": "a400_t10", "assets": 400, "periods": 10, "variables": 24110, "feasibleOnQPU": False},
+            {"label": "a400_t15", "assets": 400, "periods": 15, "variables": 36165, "feasibleOnQPU": False},
+        ],
+        "qaoaDemo": {
+            "description": "Ring MaxCut QAOA in section 2 scales qubits independently — use 4–12 on hardware, up to 20 in simulator.",
+            "searchSpace": "2^n bitstrings",
+        },
+    }

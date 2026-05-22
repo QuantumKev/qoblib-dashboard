@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { ParameterExplorePanel } from '../components/ParameterExplorePanel'
 import {
   checkLabApiHealth,
   connectIBM,
@@ -18,12 +19,16 @@ import {
   fetchQuboCatalogLive,
   runIBMDemo,
   solvePortfolioQubo,
+  sweepQaoaQubits,
+  sweepQuboLambda,
   verifyObjective,
 } from '../api/labApi'
 import type {
   BaselinesFile,
+  ExploreRunRecord,
   IBMConnectResponse,
   IBMRunResponse,
+  LambdaSweepRow,
   PaperTable6Row,
   QuboCatalogEntry,
   QuboCatalogFile,
@@ -55,10 +60,16 @@ export function LabPage() {
   const [connecting, setConnecting] = useState(false)
   const [connection, setConnection] = useState<IBMConnectResponse | null>(null)
   const [backend, setBackend] = useState('simulator')
+  const [qubits, setQubits] = useState(4)
   const [shots, setShots] = useState(1024)
   const [reps, setReps] = useState(2)
   const [running, setRunning] = useState(false)
   const [runResult, setRunResult] = useState<IBMRunResponse | null>(null)
+  const [exploreRuns, setExploreRuns] = useState<ExploreRunRecord[]>([])
+  const [qubitSweep, setQubitSweep] = useState<IBMRunResponse[] | null>(null)
+  const [lambdaSweep, setLambdaSweep] = useState<LambdaSweepRow[] | null>(null)
+  const [sweepingQubits, setSweepingQubits] = useState(false)
+  const [sweepingLambda, setSweepingLambda] = useState(false)
   const [baselines, setBaselines] = useState<BaselinesFile | null>(null)
   const [table6, setTable6] = useState<PaperTable6Row[]>([])
   const [selectedLambdaIdx, setSelectedLambdaIdx] = useState(5)
@@ -92,6 +103,10 @@ export function LabPage() {
         .catch(() => undefined)
     }
   }, [apiOnline])
+
+  useEffect(() => {
+    if (backend !== 'simulator' && qubits > 12) setQubits(12)
+  }, [backend, qubits])
 
   const selectedRow = table6[selectedLambdaIdx]
 
@@ -131,6 +146,41 @@ export function LabPage() {
   }, [quboCatalog, instanceKey])
 
   const selectedQubo: QuboCatalogEntry | undefined = quboLambdas[quboEntryIdx]
+
+  const canSweepLambda = useMemo(
+    () => quboLambdas.some((e) => e.localAvailable),
+    [quboLambdas],
+  )
+
+  function recordRun(record: Omit<ExploreRunRecord, 'id'>) {
+    setExploreRuns((prev) => [...prev, { ...record, id: `${Date.now()}-${prev.length}` }])
+  }
+
+  function recordQaoaRun(res: IBMRunResponse) {
+    recordRun({
+      kind: 'qaoa',
+      label: `QAOA ${res.qubits}q · ${res.reps}p · ${res.backend}`,
+      variables: res.searchSpaceSize ?? 2 ** res.qubits,
+      runtimeSec: res.runtimeSec,
+      objective: res.bestEnergyEstimate,
+      qubits: res.qubits,
+      reps: res.reps,
+      shots: res.shots,
+      backend: res.backend,
+    })
+  }
+
+  function recordQuboRun(res: QuboSolveResponse, entry: QuboCatalogEntry) {
+    recordRun({
+      kind: 'qubo',
+      label: `${entry.instanceKey} λ=${entry.lambda}`,
+      variables: res.numVariables,
+      runtimeSec: res.runtimeSec,
+      objective: res.objective,
+      gapPct: res.verification?.gapPct ?? null,
+      lambda: entry.lambda,
+    })
+  }
 
   useEffect(() => {
     setQuboEntryIdx(0)
@@ -173,8 +223,9 @@ export function LabPage() {
     setRunning(true)
     setRunResult(null)
     try {
-      const res = await runIBMDemo({ token, crn, channel, backend, shots, reps })
+      const res = await runIBMDemo({ token, crn, channel, backend, qubits, shots, reps })
       setRunResult(res)
+      recordQaoaRun(res)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Run failed')
     } finally {
@@ -195,6 +246,7 @@ export function LabPage() {
       setQuboResult(res)
       setYourObjective(String(Math.round(res.objective)))
       setYourRuntime(String(res.runtimeSec))
+      if (selectedQubo) recordQuboRun(res, selectedQubo)
       if (res.verification?.referenceObjective != null) {
         const v = await verifyObjective({
           problem_id: res.problemId,
@@ -208,6 +260,54 @@ export function LabPage() {
       setError(e instanceof Error ? e.message : 'QUBO solve failed')
     } finally {
       setSolvingQubo(false)
+    }
+  }
+
+  async function handleSweepQubits() {
+    setError(null)
+    setSweepingQubits(true)
+    try {
+      const res = await sweepQaoaQubits({
+        token,
+        crn,
+        channel,
+        backend: 'simulator',
+        qubit_sizes: [4, 6, 8, 10, 12, 14],
+        shots: 512,
+        reps,
+      })
+      setQubitSweep(res.sweep)
+      res.sweep.filter((r) => !r.error).forEach(recordQaoaRun)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Qubit sweep failed')
+    } finally {
+      setSweepingQubits(false)
+    }
+  }
+
+  async function handleSweepLambda() {
+    setError(null)
+    setSweepingLambda(true)
+    try {
+      const res = await sweepQuboLambda({ instance_key: instanceKey, iterations: 2500, seed: 42 })
+      setLambdaSweep(res.sweep)
+      res.sweep
+        .filter((r) => !r.error && r.objective != null && r.numVariables != null)
+        .forEach((r) =>
+          recordRun({
+            kind: 'qubo',
+            label: `${instanceKey} λ=${r.lambda}`,
+            variables: r.numVariables!,
+            runtimeSec: r.runtimeSec ?? 0,
+            objective: r.objective,
+            gapPct: r.gapPct ?? null,
+            lambda: r.lambda,
+          }),
+        )
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Lambda sweep failed')
+    } finally {
+      setSweepingLambda(false)
     }
   }
 
@@ -256,6 +356,19 @@ export function LabPage() {
       {error ? (
         <div className="rounded-lg border border-red-900/60 bg-red-950/30 px-4 py-3 text-sm text-red-200">{error}</div>
       ) : null}
+
+      <ParameterExplorePanel
+        runs={exploreRuns}
+        onClear={() => setExploreRuns([])}
+        qubitSweep={qubitSweep}
+        lambdaSweep={lambdaSweep}
+        sweepingQubits={sweepingQubits}
+        sweepingLambda={sweepingLambda}
+        onSweepQubits={handleSweepQubits}
+        onSweepLambda={handleSweepLambda}
+        canSweepLambda={canSweepLambda && !!apiOnline}
+        instanceKey={instanceKey}
+      />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <section className="rounded-xl border border-slate-800 bg-[#161d27] p-6">
@@ -316,12 +429,27 @@ export function LabPage() {
         </section>
 
         <section className="rounded-xl border border-slate-800 bg-[#161d27] p-6">
-          <h3 className="text-lg font-semibold text-white">2. Run QAOA warmup job</h3>
+          <h3 className="text-lg font-semibold text-white">2. Run QAOA on IBM Quantum (scalable qubits)</h3>
           <p className="mt-1 text-xs text-slate-500">
-            4-qubit ring MaxCut demo (QOBLIB paper Appendix A style). Use <strong className="text-slate-300">simulator</strong>{' '}
-            first, then pick a real backend from your connection.
+            Ring MaxCut QAOA — increase <strong className="text-slate-300">qubits</strong> to see exponential search-space growth.
+            Use <strong className="text-slate-300">simulator</strong> up to 20 qubits; on real hardware stay at ≤12 qubits.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <label className="text-sm text-slate-400 sm:col-span-2">
+              Qubits (problem size)
+              <div className="mt-2 flex items-center gap-3">
+                <input
+                  type="range"
+                  min={2}
+                  max={backend === 'simulator' ? 20 : 12}
+                  step={1}
+                  value={qubits}
+                  onChange={(e) => setQubits(Number(e.target.value))}
+                  className="flex-1"
+                />
+                <span className="w-24 font-mono text-sm text-cyan-300">{qubits} → 2^{qubits} = {(2 ** qubits).toLocaleString()}</span>
+              </div>
+            </label>
             <label className="text-sm text-slate-400">
               Backend
               <select
@@ -370,6 +498,7 @@ export function LabPage() {
           </button>
           {runResult ? (
             <div className="mt-4 rounded-lg bg-slate-900/60 p-3 text-xs text-slate-300">
+              <p><span className="text-slate-500">Qubits:</span> {runResult.qubits} · <span className="text-slate-500">Params:</span> {runResult.parameterCount ?? '—'}</p>
               <p><span className="text-slate-500">Backend:</span> {runResult.backend}</p>
               <p><span className="text-slate-500">Runtime:</span> {runResult.runtimeSec}s</p>
               <p><span className="text-slate-500">Best bitstring:</span> <code>{runResult.bestBitstring}</code></p>
@@ -453,8 +582,11 @@ export function LabPage() {
             onClick={handleSolveQubo}
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500 disabled:opacity-40"
           >
-            {solvingQubo ? 'Solving…' : 'Run simulated annealing'}
+            {solvingQubo ? 'Solving…' : 'Run SA & record'}
           </button>
+          <p className="w-full text-xs text-slate-500">
+            Tip: start with <strong className="text-slate-300">a010</strong> (710 vars), then move to <strong className="text-slate-300">a050</strong> (3,110–4,665 vars). Use the λ sweep button above to compare all risk levels on one instance.
+          </p>
         </div>
         {selectedQubo && !selectedQubo.localAvailable ? (
           <p className="mt-3 text-xs text-amber-300">

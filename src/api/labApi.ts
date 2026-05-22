@@ -30,6 +30,7 @@ export function runIBMDemo(params: {
   token: string
   crn: string
   backend: string
+  qubits: number
   shots: number
   reps: number
   channel?: string
@@ -38,6 +39,36 @@ export function runIBMDemo(params: {
     method: 'POST',
     body: JSON.stringify(params),
   })
+}
+
+export function sweepQaoaQubits(params: {
+  token?: string
+  crn?: string
+  backend: string
+  qubit_sizes: number[]
+  shots: number
+  reps: number
+  channel?: string
+}) {
+  return api<{ sweep: import('../types/lab').IBMRunResponse[]; count: number }>('/api/ibm/sweep-qubits', {
+    method: 'POST',
+    body: JSON.stringify(params),
+  })
+}
+
+export function sweepQuboLambda(params: { instance_key: string; iterations?: number; seed?: number }) {
+  return api<{ instanceKey: string; iterations: number; sweep: import('../types/lab').LambdaSweepRow[] }>(
+    '/api/portfolio/sweep-lambda',
+    { method: 'POST', body: JSON.stringify(params) },
+  )
+}
+
+export function fetchVariableScale() {
+  return api<{
+    formula: string
+    instances: { label: string; assets: number; periods: number; variables: number }[]
+    qaoaDemo: { description: string; searchSpace: string }
+  }>('/api/explore/variable-scale')
 }
 
 export function verifyObjective(params: {

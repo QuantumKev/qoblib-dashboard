@@ -71,6 +71,24 @@ Open http://localhost:5173/lab
 
 IBM credentials stay in session storage and hit the local API only — never GitHub Pages.
 
+### Student parameter lab
+
+The top panel on `/lab` lets learners **change variables and compare outcomes**:
+
+| Knob | Where | What students learn |
+|------|--------|---------------------|
+| **Qubits** (slider) | Section 2 | Search space grows as 2ⁿ; runtime/noise increase on hardware |
+| **QAOA reps / shots** | Section 2 | Circuit depth vs solution quality |
+| **Asset scale** (a010 → a050) | Section 3 | QUBO size 710 → 4,665 variables |
+| **Risk λ** | Section 3 | Paper Figure 11 — harder problems as λ changes |
+| **SA iterations** | Section 3 | Classical effort vs objective gap |
+
+**One-click sweeps:**
+- **QAOA qubit sweep** — runs 4, 6, 8, 10, 12, 14 qubits on the simulator and plots runtime
+- **λ sweep** — runs every downloaded λ for the selected instance and plots objective/runtime
+
+Each manual run is **recorded automatically** in the comparison log.
+
 ## Ingest & fetch QOBLIB data
 
 ```powershell
