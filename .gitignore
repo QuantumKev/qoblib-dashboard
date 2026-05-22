@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+dist/
+
+# QOBLIB source clone (regenerate JSON via scripts/ingest_portfolio.py)
+data/qoblib/
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# Env
+.env
+.env.*
