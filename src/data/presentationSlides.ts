@@ -81,6 +81,45 @@ export const SLIDES: Slide[] = [
       'Demo the instance selector live. Show po_a010_t10_orig then po_a050_t15_s00 to contrast size.',
   },
   {
+    id: 'workforce-qgg',
+    title: 'Quantum Global Group — industry playbook in software',
+    bullets: [
+      'Define outcome → fit check → pilot → benchmark → report → enable team',
+      'Same six steps mapped to routes: /workforce, /lab, /portfolio, /present',
+      'Students produce deliverables they can explain to executives',
+      'Portfolio optimization aligns with QGG hybrid quantum finance research',
+    ],
+    notes:
+      'Open /workforce first. Walk the playbook cards. Emphasize capability building is the product — not a one-off demo.',
+    accent: 'quantumglobalgroup.io · workforce development',
+  },
+  {
+    id: 'workforce-hbcu',
+    title: 'IBM-HBCU Quantum Center alignment',
+    bullets: [
+      '13 HBCUs: cloud access, Qiskit education, research opportunities',
+      'This lab uses IBM Quantum Platform + Qiskit Runtime (same stack)',
+      'Students connect token + CRN → simulator → real QPU — no mock APIs',
+      'QOBLIB verification = research-community language (submission IDs, gap %)',
+    ],
+    notes:
+      'Reference the 2020 center announcement. Tie to Educators Program and learning.quantum.ibm.com. Diversity & belonging: students showcase results visually even without HPC.',
+    accent: 'Built for cohorts IBM already invests in',
+  },
+  {
+    id: 'lab-demo',
+    title: 'Live lab demo (5 minutes)',
+    bullets: [
+      'Parameter panel: qubit sweep shows exponential scaling',
+      'IBM connect → run on ibm_torino (or simulator if queue long)',
+      'QUBO λ sweep on po_a050_t15_s00 vs ABS2 baselines',
+      'Recorded run log — students duplicate for weekly reports',
+    ],
+    notes:
+      'Have server running locally: npm run server + npm run dev. GitHub Pages shows static content only — IBM demo needs local API.',
+    accent: 'Show honest fit check: full portfolio ≠ NISQ qubits today',
+  },
+  {
     id: 'results',
     title: 'Key results (so far)',
     bullets: [
@@ -94,14 +133,15 @@ export const SLIDES: Slide[] = [
   },
   {
     id: 'close',
-    title: 'Takeaways',
+    title: 'Takeaways for IBM & partners',
     bullets: [
-      'QOBLIB = shared scoreboard for optimization research',
-      'Portfolio #06 connects quantum benchmarking to finance',
-      'Try it: github.com/ZIB-AOPT/QOBLIB',
+      'QOBLIB + this dashboard = reproducible workforce lab on IBM stack',
+      'IBM-HBCU Center goals met: access, Qiskit, research, diverse talent pipeline',
+      'Quantum Global Group playbook operationalized for colleges & cohorts',
+      'Fork: github.com/QuantumKev/qoblib-dashboard · Live: /workforce · Demo: /lab',
       'Questions?',
     ],
     notes:
-      'Point audience to the dashboard repo and original paper. Offer to walk through the Beginner Guide page.',
+      'Close with offer: pilot cohort at an HBCU partner or IBM Educators site. Kevin Robinson / Quantum Global Group workforce track.',
   },
 ]

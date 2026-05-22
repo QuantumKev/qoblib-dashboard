@@ -42,6 +42,7 @@ The **Quantum Lab** compares QUBO runs against **ABS2** references and Table 6 *
 | `/` | Overview and why QOBLIB exists |
 | `/decathlon` | All 10 problem classes + size chart |
 | `/portfolio` | Formulation, naming, live price/covariance data, paper charts |
+| `/workforce` | **IBM HBCU + Quantum Global Group workforce program** — industry playbook, 5-week curriculum |
 | `/lab` | IBM Quantum + QUBO solve + QOBLIB verification (local API) |
 | `/learn` | Beginner-friendly explanations |
 | `/present` | Fullscreen presentation mode |
@@ -70,6 +71,14 @@ npm run dev
 Open http://localhost:5173/lab
 
 IBM credentials stay in session storage and hit the local API only — never GitHub Pages.
+
+## Workforce program (IBM HBCU · Quantum Global Group)
+
+The **`/workforce`** page maps [Quantum Global Group](https://www.quantumglobalgroup.io)'s six-step delivery process onto dashboard routes and aligns each module with [IBM-HBCU Quantum Center](https://www.ibm.com/quantum/blog/ibm-hbcu-quantum-center) goals (cloud access, Qiskit, research, diverse talent pipeline).
+
+**IBM presentation demo path:** `/workforce` → `/lab` (IBM connect + sweeps) → `/portfolio` → `/present` (slides 8–11).
+
+See **`/workforce`** for the full 5-week cohort curriculum and enterprise-vs-student checklist.
 
 ### Student parameter lab
 

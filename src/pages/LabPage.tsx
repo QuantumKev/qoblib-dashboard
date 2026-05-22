@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Bar,
   BarChart,
@@ -338,6 +339,20 @@ export function LabPage() {
       <header>
         <p className="text-sm text-cyan-400">Workforce development lab</p>
         <h2 className="mt-1 text-3xl font-semibold text-white">IBM Quantum + QOBLIB Verification</h2>
+        <p className="mt-2 text-xs text-emerald-400/90">
+          Aligned with{' '}
+          <a href="https://www.ibm.com/quantum/blog/ibm-hbcu-quantum-center" target="_blank" rel="noreferrer" className="underline hover:text-emerald-300">
+            IBM-HBCU Quantum Center
+          </a>{' '}
+          &{' '}
+          <a href="https://www.quantumglobalgroup.io" target="_blank" rel="noreferrer" className="underline hover:text-emerald-300">
+            Quantum Global Group
+          </a>{' '}
+          playbook —{' '}
+          <Link to="/workforce" className="underline hover:text-emerald-300">
+            view full curriculum →
+          </Link>
+        </p>
         <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-400">
           Connect IBM Quantum for a hardware warmup, then run official QOBLIB portfolio QUBOs at a050 scale
           (3,110–4,665 variables) with classical simulated annealing and compare against published ABS2/Gurobi results.

@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 
 const links: { to: string; label: string; highlight?: boolean }[] = [
   { to: '/', label: 'Overview' },
+  { to: '/workforce', label: 'Workforce Program', highlight: true },
   { to: '/decathlon', label: '10 Problems' },
   { to: '/portfolio', label: 'Portfolio Deep Dive' },
   { to: '/lab', label: 'Quantum Lab', highlight: true },
@@ -16,6 +17,7 @@ export function Sidebar() {
         <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">QOBLIB</p>
         <h1 className="mt-1 text-lg font-semibold leading-snug text-white">Intractable Decathlon</h1>
         <p className="mt-2 text-xs leading-relaxed text-slate-400">Interactive dashboard for arXiv:2504.03832</p>
+        <p className="mt-2 text-[10px] leading-relaxed text-emerald-500/80">IBM HBCU · Quantum Global Group workforce lab</p>
       </div>
       <nav className="flex flex-col gap-1">
         {links.map((link) => (
@@ -40,6 +42,17 @@ export function Sidebar() {
       <div className="mt-auto space-y-2 pt-8 text-xs text-slate-500">
         <a href="https://arxiv.org/abs/2504.03832" target="_blank" rel="noreferrer" className="block hover:text-cyan-400">
           Paper on arXiv
+        </a>
+        <a
+          href="https://www.ibm.com/quantum/blog/ibm-hbcu-quantum-center"
+          target="_blank"
+          rel="noreferrer"
+          className="block hover:text-cyan-400"
+        >
+          IBM-HBCU Quantum Center
+        </a>
+        <a href="https://www.quantumglobalgroup.io" target="_blank" rel="noreferrer" className="block hover:text-cyan-400">
+          Quantum Global Group
         </a>
         <a href="https://github.com/ZIB-AOPT/QOBLIB" target="_blank" rel="noreferrer" className="block hover:text-cyan-400">
           GitHub repository

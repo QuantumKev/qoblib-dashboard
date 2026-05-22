@@ -6,6 +6,7 @@ import { LearnPage } from './pages/LearnPage'
 import { OverviewPage } from './pages/OverviewPage'
 import { PortfolioPage } from './pages/PortfolioPage'
 import { PresentPage } from './pages/PresentPage'
+import { WorkforcePage } from './pages/WorkforcePage'
 
 function DashboardShell() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/decathlon" element={<DecathlonPage />} />
           <Route path="/portfolio" element={<PortfolioPage />} />
           <Route path="/lab" element={<LabPage />} />
+          <Route path="/workforce" element={<WorkforcePage />} />
           <Route path="/learn" element={<LearnPage />} />
         </Route>
       </Routes>

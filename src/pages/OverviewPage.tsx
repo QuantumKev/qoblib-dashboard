@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { PAPER } from '../data/qoblibData'
 
 type StatProps = { label: string; value: string; hint?: string }
@@ -69,6 +70,25 @@ export function OverviewPage() {
               {tag}
             </span>
           ))}
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-emerald-900/40 bg-emerald-950/15 p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-emerald-400">Workforce development</p>
+            <h3 className="mt-1 text-lg font-semibold text-white">IBM HBCU Quantum Center · Quantum Global Group playbook</h3>
+            <p className="mt-2 max-w-2xl text-sm text-slate-400">
+              Students duplicate the same define → pilot → benchmark → present workflow industry teams use — on QOBLIB
+              portfolio #06 with IBM Quantum cloud jobs and QOBLIB verification charts.
+            </p>
+          </div>
+          <Link
+            to="/workforce"
+            className="shrink-0 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium hover:bg-emerald-600"
+          >
+            Open workforce program →
+          </Link>
         </div>
       </section>
 
