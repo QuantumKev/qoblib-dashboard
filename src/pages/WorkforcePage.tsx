@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { PartnerCoBrand } from '../components/PartnerCoBrand'
+import { WorkforceHandoutPrint } from '../components/WorkforceHandoutPrint'
 import {
   ENTERPRISE_VS_STUDENT,
   HBCU_MEMBERS,
@@ -58,10 +60,17 @@ function PlaybookCard({
 }
 
 export function WorkforcePage() {
+  function printHandout() {
+    window.print()
+  }
+
   return (
-    <div className="space-y-10">
+    <>
+      <WorkforceHandoutPrint />
+      <div className="no-print space-y-10">
       <header className="rounded-2xl border border-indigo-900/40 bg-gradient-to-br from-[#161d27] via-[#121820] to-indigo-950/30 p-8">
-        <p className="text-sm font-medium text-emerald-400">Workforce development · IBM & industry aligned</p>
+        <PartnerCoBrand />
+        <p className="mt-6 text-sm font-medium text-emerald-400">Workforce development · IBM & industry aligned</p>
         <h2 className="mt-2 max-w-4xl text-3xl font-semibold leading-tight text-white">
           Train students to duplicate the same quantum optimization workflow enterprises use — with visuals they can present
         </h2>
@@ -90,6 +99,13 @@ export function WorkforcePage() {
           >
             Presentation mode
           </Link>
+          <button
+            type="button"
+            onClick={printHandout}
+            className="rounded-lg border border-emerald-600/60 bg-emerald-950/40 px-4 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-900/40"
+          >
+            Download handout (PDF)
+          </button>
           <a
             href={PARTNERS.ibmHbcu.educatorsUrl}
             target="_blank"
@@ -258,14 +274,18 @@ export function WorkforcePage() {
             </li>
           ))}
         </ul>
-        <p className="mt-6 text-xs text-slate-500">
-          Live demo path: /workforce (this page) → /lab (IBM connect + qubit sweep) → /portfolio (a050 charts) → /present
-          (slide 8–10). Repo:{' '}
+        <p className="mt-3 text-xs text-slate-500 no-print">
+          <strong className="text-slate-400">Handout:</strong> Click “Download handout (PDF)” — in the print dialog choose
+          “Save as PDF”. One page, co-branded for IBM &amp; Quantum Global Group.
+        </p>
+        <p className="mt-2 text-xs text-slate-500">
+          Live demo path: /workforce → /lab → /portfolio → /present (slides 8–11). Repo:{' '}
           <a href="https://github.com/QuantumKev/qoblib-dashboard" target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline">
             QuantumKev/qoblib-dashboard
           </a>
         </p>
       </section>
-    </div>
+      </div>
+    </>
   )
 }

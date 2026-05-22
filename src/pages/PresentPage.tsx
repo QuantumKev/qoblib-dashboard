@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { PartnerCoBrand } from '../components/PartnerCoBrand'
 import { SLIDES } from '../data/presentationSlides'
 
 export function PresentPage() {
@@ -31,13 +32,20 @@ export function PresentPage() {
   }, [next, prev])
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0e14] text-white">
-      <header className="flex items-center justify-between border-b border-slate-800 px-6 py-3">
-        <div className="text-sm text-slate-400">
-          Presentation mode · Slide {index + 1} / {SLIDES.length}
+    <div className="present-mode fixed inset-0 z-50 flex flex-col bg-[#0a0e14] text-white">
+      <header className="present-chrome flex items-center justify-between border-b border-slate-800 px-6 py-3">
+        <div className="flex items-center gap-4">
+          <PartnerCoBrand compact />
+          <span className="hidden text-sm text-slate-500 sm:inline">·</span>
+          <div className="hidden text-sm text-slate-400 sm:block">
+            Slide {index + 1} / {SLIDES.length}
+          </div>
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span>← → navigate · N toggle notes · Esc exit</span>
+        <div className="present-chrome flex items-center gap-3 text-xs text-slate-500">
+          <span className="hidden md:inline">← → navigate · N toggle notes</span>
+          <Link to="/workforce" className="rounded-lg border border-emerald-800/60 px-3 py-1.5 text-emerald-400/90 hover:bg-emerald-950/40">
+            Workforce
+          </Link>
           <Link to="/" className="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-300 hover:bg-slate-800">
             Exit
           </Link>
@@ -48,6 +56,11 @@ export function PresentPage() {
         <main className="flex flex-1 flex-col justify-center px-12 py-10 lg:px-20">
           {slide.accent ? (
             <p className="mb-4 text-sm font-medium uppercase tracking-widest text-cyan-400">{slide.accent}</p>
+          ) : null}
+          {slide.showPartners ? (
+            <div className="mb-8 max-w-3xl">
+              <PartnerCoBrand />
+            </div>
           ) : null}
           <h1 className="max-w-4xl text-4xl font-semibold leading-tight lg:text-5xl">{slide.title}</h1>
           <ul className="mt-10 max-w-3xl space-y-5">
@@ -61,14 +74,14 @@ export function PresentPage() {
         </main>
 
         {showNotes ? (
-          <aside className="border-t border-amber-900/50 bg-amber-950/30 px-12 py-4 lg:px-20">
+          <aside className="present-chrome border-t border-amber-900/50 bg-amber-950/30 px-12 py-4 lg:px-20">
             <p className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">Speaker notes</p>
             <p className="mt-2 max-w-4xl text-sm leading-relaxed text-amber-100/85">{slide.notes}</p>
           </aside>
         ) : null}
       </div>
 
-      <footer className="flex items-center justify-between border-t border-slate-800 px-6 py-4">
+      <footer className="present-chrome flex items-center justify-between border-t border-slate-800 px-6 py-4">
         <button
           type="button"
           onClick={prev}

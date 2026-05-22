@@ -4,19 +4,23 @@ export type Slide = {
   bullets: string[]
   notes: string
   accent?: string
+  showPartners?: boolean
 }
 
 export const SLIDES: Slide[] = [
   {
     id: 'intro',
-    title: 'Quantum Optimization Benchmarking Library',
+    title: 'QOBLIB Workforce Quantum Optimization Lab',
+    showPartners: true,
     bullets: [
-      'Paper: “The Intractable Decathlon” (arXiv:2504.03832)',
-      'IBM Quantum, ZIB Berlin, Purdue, and 20+ collaborators',
-      'Goal: fair, reproducible tests for quantum vs classical optimization',
+      'Open benchmark dashboard — arXiv:2504.03832 “Intractable Decathlon”',
+      'IBM-HBCU Quantum Center stack: Qiskit Runtime + IBM Quantum Platform',
+      'Quantum Global Group playbook: define → pilot → benchmark → enable',
+      'Students duplicate industry workflow with visuals they can defend',
     ],
     notes:
-      'Open with the problem: lots of quantum advantage claims, few shared benchmarks. This paper is infrastructure — a standardized exam for solvers.',
+      'Title slide: name both partners. IBM = access + Qiskit + HBCU mission. QGG = workforce playbook + portfolio optimization research. This is capability building on IBM infrastructure.',
+    accent: 'IBM Quantum × Quantum Global Group × QOBLIB',
   },
   {
     id: 'why',

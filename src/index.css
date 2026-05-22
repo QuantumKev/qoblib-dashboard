@@ -12,3 +12,37 @@ body {
   background: #0f1419;
   color: #e7ecf3;
 }
+
+/* One-page workforce handout → Save as PDF via browser print */
+@media print {
+  @page {
+    size: letter;
+    margin: 0.35in;
+  }
+
+  body,
+  html,
+  #root {
+    height: auto !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  aside,
+  nav,
+  .no-print,
+  .present-chrome {
+    display: none !important;
+  }
+
+  #workforce-handout {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+  }
+
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+}
