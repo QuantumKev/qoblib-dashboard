@@ -12,8 +12,12 @@ import { PortfolioLiveCharts } from '../components/PortfolioLiveCharts'
 import {
   LAMBDA_BENCHMARK,
   OBJECTIVE_CONVERGENCE,
+  PORTFOLIO_DATA_FORMAT,
+  PORTFOLIO_FEATURES,
   PORTFOLIO_INSTANCES,
+  PORTFOLIO_NAMING,
   PORTFOLIO_PARAMS,
+  PORTFOLIO_REPO_LAYOUT,
   RUNTIME_BY_LAMBDA,
 } from '../data/qoblibData'
 
@@ -23,10 +27,76 @@ export function PortfolioPage() {
       <header>
         <h2 className="text-3xl font-semibold text-white">Portfolio Optimization (#06)</h2>
         <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-400">
-          Multi-period Markowitz-style portfolio selection with binary buy/hold decisions, transaction costs,
+          Multi-period Markowitz portfolio selection with binary buy/hold decisions, transaction costs,
           short-selling fees, and capital constraints — built from real S&P 500 prices and covariances.
+          Matches the official{' '}
+          <a
+            href="https://github.com/ZIB-AOPT/QOBLIB/tree/main/06-portfolio"
+            target="_blank"
+            rel="noreferrer"
+            className="text-cyan-400 hover:underline"
+          >
+            QOBLIB 06-portfolio
+          </a>{' '}
+          benchmark.
         </p>
       </header>
+
+      <section className="rounded-xl border border-slate-800 bg-[#161d27] p-6">
+        <h3 className="text-lg font-semibold text-white">Problem features (official README)</h3>
+        <ul className="mt-4 grid gap-2 md:grid-cols-2">
+          {PORTFOLIO_FEATURES.map((f) => (
+            <li key={f} className="text-sm text-slate-400">• {f}</li>
+          ))}
+        </ul>
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-lg bg-slate-900/50 p-4 text-sm text-slate-400">
+            <p className="font-medium text-white">Objective (minimize)</p>
+            <p className="mt-2 leading-relaxed">
+              Per period: λ-weighted covariance risk minus expected profit, plus transaction costs δ,
+              minus cash interest ρ<sub>c</sub>, plus short-selling cost ρ<sub>s</sub>, plus final liquidation cost.
+            </p>
+            <p className="mt-3 font-medium text-white">Constraints (each day t)</p>
+            <p className="mt-1 font-mono text-xs text-cyan-300">Σᵢ τᵢ xᵢₜ + Σc 2ᶜ y_cₜ = C</p>
+            <p className="text-xs text-slate-500">Capital limit — total units held plus cash encoding equals C</p>
+            <p className="mt-2 font-mono text-xs text-cyan-300">Σᵢ xᵢₜ + Σb 2ᵇ s_bₜ = B</p>
+            <p className="text-xs text-slate-500">Position limit — at most B assets per day</p>
+          </div>
+          <div className="rounded-lg bg-slate-900/50 p-4 text-sm text-slate-400">
+            <p className="font-medium text-white">Instance naming</p>
+            <p className="mt-2 font-mono text-xs text-amber-300">Price data: {PORTFOLIO_NAMING.priceInstance}</p>
+            <p className="mt-1 font-mono text-xs text-amber-300">QUBO file: {PORTFOLIO_NAMING.quboProblem}</p>
+            <ul className="mt-3 space-y-2 text-xs">
+              {PORTFOLIO_NAMING.fields.map((row) => (
+                <li key={row.code}>
+                  <span className="font-mono text-cyan-300">{row.code}</span> — {row.meaning}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-3">
+        {Object.entries(PORTFOLIO_DATA_FORMAT).map(([k, v]) => (
+          <div key={k} className="rounded-xl border border-slate-800 bg-[#161d27] p-4">
+            <p className="text-xs uppercase text-slate-500">{k}</p>
+            <p className="mt-1 text-sm text-slate-300">{v}</p>
+          </div>
+        ))}
+      </section>
+
+      <section className="rounded-xl border border-slate-800 bg-[#161d27] p-6">
+        <h3 className="text-lg font-semibold text-white">QOBLIB repository layout</h3>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          {PORTFOLIO_REPO_LAYOUT.map((row) => (
+            <div key={row.dir} className="flex gap-2 text-sm">
+              <code className="shrink-0 text-cyan-300">{row.dir}</code>
+              <span className="text-slate-400">{row.desc}</span>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {Object.entries({
@@ -64,7 +134,7 @@ export function PortfolioPage() {
 
       <section className="rounded-xl border border-slate-800 bg-[#161d27] p-6">
         <h3 className="text-lg font-semibold text-white">Benchmark instances (Table 5)</h3>
-        <p className="mt-1 text-xs text-slate-500">4 instances per row (1 original S&P data + 3 perturbed). Naming: po_a{'{assets}'}_t{'{periods}'}_s{'{seed}'}</p>
+        <p className="mt-1 text-xs text-slate-500">4 instances per row (1 original S&P data + 3 perturbed). Price ID: po_a{'{assets}'}_t{'{periods}'}_{'{orig|sXX}'} · QUBO ID adds b{'{BBB}'} and l{'{λ}'}</p>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>

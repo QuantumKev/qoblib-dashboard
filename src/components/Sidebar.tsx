@@ -4,6 +4,7 @@ const links: { to: string; label: string; highlight?: boolean }[] = [
   { to: '/', label: 'Overview' },
   { to: '/decathlon', label: '10 Problems' },
   { to: '/portfolio', label: 'Portfolio Deep Dive' },
+  { to: '/lab', label: 'Quantum Lab', highlight: true },
   { to: '/learn', label: 'Beginner Guide' },
   { to: '/present', label: 'Presentation', highlight: true },
 ]

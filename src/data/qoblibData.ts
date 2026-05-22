@@ -30,6 +30,42 @@ export const PROBLEM_CLASSES: ProblemClass[] = [
   { id: 10, slug: 'topology', name: 'Topology Design', description: 'Graph golf / node-degree-diameter', domain: 'Network topology', mipVars: 2176, quboVars: null, difficulty: 'large' },
 ]
 
+export const PORTFOLIO_FEATURES = [
+  'Multi-period rebalancing over T allocation days',
+  'Transaction costs δ on buys, sells, and liquidation',
+  'Short selling with borrowing cost ρₛ',
+  'Capital limit C via binary slack variables y_ct',
+  'Position limit B via slack variables s_bt',
+]
+
+/** QOBLIB instance naming — price data vs QUBO problem files */
+export const PORTFOLIO_NAMING = {
+  priceInstance: 'po_a{assets}_t{periods}_{orig|sXX}',
+  quboProblem: 'a{assets}_t{periods}_{orig|sXX}_b{BBB}_l{lambda}',
+  fields: [
+    { code: 'aXXX', meaning: 'Number of assets (10, 50, 200, 400 from S&P 500 by market cap)' },
+    { code: 'tXX', meaning: 'Allocation periods / days (10 or 15)' },
+    { code: 'sXX / orig', meaning: 'orig = original S&P data; s00–s02 = perturbed seeds for robustness' },
+    { code: 'bXXX', meaning: 'Max positions B (e.g. b020 = hold at most 20 assets per day)' },
+    { code: 'lX', meaning: 'Risk aversion λ — higher λ penalizes covariance risk more heavily' },
+  ],
+}
+
+export const PORTFOLIO_DATA_FORMAT = {
+  prices: 'stock_prices.txt.gz — day index, symbol, price',
+  covariance: 'covariance_matrices.txt.gz — day, symbol₁, symbol₂, return covariance',
+  qubo: 'models/unconstrained_quadratic_optimization/qs_files/*.qs.xz — sparse QUBO from Zimpl',
+}
+
+export const PORTFOLIO_REPO_LAYOUT = [
+  { dir: 'instances/', desc: 'Price & covariance data (.txt.gz)' },
+  { dir: 'models/', desc: 'MIP/BQP and UQO/QUBO formulations' },
+  { dir: 'solutions/', desc: 'Best-known objectives by solver' },
+  { dir: 'submissions/', desc: 'Community benchmark CSVs' },
+  { dir: 'check/', desc: 'Solution verification tools' },
+  { dir: 'misc/instance_generation/', desc: 'Regenerate instances (main.py)' },
+]
+
 export const PORTFOLIO_PARAMS = {
   riskFreeRate: { daily: '0.01%', annual: '2.55%' },
   transactionCost: { daily: '0.1%', note: 'Applied on buy/sell and liquidation' },
@@ -69,6 +105,18 @@ export const LAMBDA_BENCHMARK = [
   { lambda: 0.0005, gurobiGap: 9.8, gurobiTime: 3600.1, abs2Gap: 0.55, abs2Time: 1497.6 },
   { lambda: 0.001, gurobiGap: 16.9, gurobiTime: 3600.2, abs2Gap: 4.91, abs2Time: 741.9 },
   { lambda: 0.01, gurobiGap: 99.35, gurobiTime: 3661.8, abs2Gap: 99.35, abs2Time: 1510.8 },
+]
+
+/** Paper Table 6 — Gurobi vs ABS2 on po_a050_t15_s00 (for lab verification fallback) */
+export const PAPER_TABLE6 = [
+  { lambda: 0, gurobiObjective: -879572, gurobiRuntimeSec: 0.4, gurobiGapPct: 0.0, abs2Objective: -879572, abs2RuntimeSec: 90.0, abs2GapPct: 0.0 },
+  { lambda: 0.000001, gurobiObjective: -872055, gurobiRuntimeSec: 398.7, gurobiGapPct: 0.01, abs2Objective: -872055, abs2RuntimeSec: 79.1, abs2GapPct: 0.0 },
+  { lambda: 0.00001, gurobiObjective: -819899, gurobiRuntimeSec: 3600.1, gurobiGapPct: 8.21, abs2Objective: -819899, abs2RuntimeSec: 30.2, abs2GapPct: 0.0 },
+  { lambda: 0.00005, gurobiObjective: -680124, gurobiRuntimeSec: 3600.2, gurobiGapPct: 1.8, abs2Objective: -680124, abs2RuntimeSec: 50.7, abs2GapPct: 0.0 },
+  { lambda: 0.0001, gurobiObjective: -586823, gurobiRuntimeSec: 3600.2, gurobiGapPct: 3.01, abs2Objective: -586823, abs2RuntimeSec: 206.7, abs2GapPct: 0.0 },
+  { lambda: 0.0005, gurobiObjective: -386990, gurobiRuntimeSec: 3600.1, gurobiGapPct: 9.8, abs2Objective: -384862, abs2RuntimeSec: 1497.6, abs2GapPct: 0.55 },
+  { lambda: 0.001, gurobiObjective: -314736, gurobiRuntimeSec: 3600.2, gurobiGapPct: 16.9, abs2Objective: -299298, abs2RuntimeSec: 741.9, abs2GapPct: 4.91 },
+  { lambda: 0.01, gurobiObjective: -437920, gurobiRuntimeSec: 3661.8, gurobiGapPct: 99.35, abs2Objective: -2825, abs2RuntimeSec: 1510.8, abs2GapPct: 99.35 },
 ]
 
 /** Approximate runtime vs risk aversion from Figure 11 (seconds, log scale friendly) */

@@ -8,7 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "ingest": "python scripts/ingest_portfolio.py"
+    "ingest": "python scripts/ingest_portfolio.py",
+    "ingest:baselines": "python scripts/ingest_baselines.py",
+    "ingest:qubo": "python scripts/ingest_qubo_catalog.py",
+    "fetch:qubo": "python scripts/fetch_qubo_files.py --assets 50",
+    "server": "python -m uvicorn main:app --reload --port 8000 --app-dir server"
   },
   "dependencies": {
     "react": "^19.2.6",

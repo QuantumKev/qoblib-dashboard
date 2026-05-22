@@ -1,6 +1,7 @@
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom'
 import { Sidebar } from './components/Sidebar'
 import { DecathlonPage } from './pages/DecathlonPage'
+import { LabPage } from './pages/LabPage'
 import { LearnPage } from './pages/LearnPage'
 import { OverviewPage } from './pages/OverviewPage'
 import { PortfolioPage } from './pages/PortfolioPage'
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/" element={<OverviewPage />} />
           <Route path="/decathlon" element={<DecathlonPage />} />
           <Route path="/portfolio" element={<PortfolioPage />} />
+          <Route path="/lab" element={<LabPage />} />
           <Route path="/learn" element={<LearnPage />} />
         </Route>
       </Routes>
