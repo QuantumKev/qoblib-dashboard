@@ -1,3 +1,4 @@
+import { QggLogo } from './QggLogo'
 import { PARTNERS } from '../data/workforceData'
 
 type Props = {
@@ -9,36 +10,30 @@ export function PartnerCoBrand({ compact = false }: Props) {
   if (compact) {
     return (
       <div className="flex flex-wrap items-center gap-3 text-xs">
-        <span className="rounded-md border border-[#052FAD]/40 bg-[#052FAD]/10 px-2.5 py-1 font-semibold text-[#6BA3FF]">
-          IBM Quantum
-        </span>
-        <span className="text-slate-600">×</span>
-        <span className="rounded-md border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 font-semibold text-violet-300">
-          Quantum Global Group
-        </span>
-        <span className="text-slate-600">×</span>
-        <span className="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 font-medium text-cyan-300">
-          QOBLIB Workforce Lab
-        </span>
+        <span className="qgg-tag bg-qgg-accent font-semibold">IBM Quantum</span>
+        <span className="text-qgg-muted">×</span>
+        <QggLogo size="sm" linkHome={false} />
+        <span className="text-qgg-muted">×</span>
+        <span className="qgg-tag font-medium">QOBLIB Lab</span>
       </div>
     )
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-0 border-2 border-qgg sm:grid-cols-3">
       <a
         href={PARTNERS.ibmHbcu.url}
         target="_blank"
         rel="noreferrer"
-        className="group rounded-xl border border-[#052FAD]/50 bg-gradient-to-br from-[#052FAD]/20 to-transparent p-4 transition hover:border-[#052FAD]/80"
+        className="group border-b border-qgg bg-qgg-paper p-4 transition hover:bg-qgg-accent sm:border-b-0 sm:border-r"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#052FAD] text-sm font-bold text-white">
+          <div className="flex h-11 w-11 items-center justify-center border-2 border-qgg bg-[#052FAD] text-sm font-bold text-white">
             IBM
           </div>
           <div>
-            <p className="text-sm font-semibold text-[#6BA3FF] group-hover:text-white">IBM Quantum</p>
-            <p className="text-[10px] leading-tight text-slate-400">HBCU Quantum Center · Qiskit · Cloud access</p>
+            <p className="text-sm font-semibold group-hover:underline">IBM Quantum</p>
+            <p className="text-[10px] leading-tight text-qgg-muted">HBCU Quantum Center · Qiskit · Cloud access</p>
           </div>
         </div>
       </a>
@@ -46,26 +41,24 @@ export function PartnerCoBrand({ compact = false }: Props) {
         href={PARTNERS.quantumGlobalGroup.url}
         target="_blank"
         rel="noreferrer"
-        className="group rounded-xl border border-violet-500/50 bg-gradient-to-br from-violet-500/15 to-transparent p-4 transition hover:border-violet-400/80"
+        className="group border-b border-qgg bg-qgg-paper p-4 transition hover:bg-qgg-accent sm:border-b-0 sm:border-r"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-violet-600 text-[10px] font-bold leading-tight text-white">
-            QGG
-          </div>
+          <QggLogo size="sm" linkHome={false} />
           <div>
-            <p className="text-sm font-semibold text-violet-300 group-hover:text-white">Quantum Global Group</p>
-            <p className="text-[10px] leading-tight text-slate-400">Workforce development · Industry playbook</p>
+            <p className="text-sm font-semibold group-hover:underline">Quantum Global Group</p>
+            <p className="text-[10px] leading-tight text-qgg-muted">Workforce development · Industry playbook</p>
           </div>
         </div>
       </a>
-      <div className="rounded-xl border border-cyan-500/40 bg-gradient-to-br from-cyan-500/10 to-transparent p-4">
+      <div className="bg-qgg-accent/40 p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-cyan-600 text-[9px] font-bold leading-tight text-white">
+          <div className="flex h-11 w-11 items-center justify-center border-2 border-qgg bg-qgg-paper text-[9px] font-bold leading-tight">
             QOBLIB
           </div>
           <div>
-            <p className="text-sm font-semibold text-cyan-300">Intractable Decathlon</p>
-            <p className="text-[10px] leading-tight text-slate-400">Portfolio #06 · arXiv:2504.03832</p>
+            <p className="text-sm font-semibold">Intractable Decathlon</p>
+            <p className="text-[10px] leading-tight text-qgg-muted">Portfolio #06 · arXiv:2504.03832</p>
           </div>
         </div>
       </div>

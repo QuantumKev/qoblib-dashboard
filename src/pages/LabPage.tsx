@@ -11,6 +11,9 @@ import {
   YAxis,
 } from 'recharts'
 import { ParameterExplorePanel } from '../components/ParameterExplorePanel'
+import { PageHeader } from '../components/ui/PageHeader'
+import { QggPanel } from '../components/ui/QggPanel'
+import { QGG_CHART } from '../chartTheme'
 import {
   checkLabApiHealth,
   connectIBM,
@@ -335,41 +338,41 @@ export function LabPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <header>
-        <p className="text-sm text-cyan-400">Workforce development lab</p>
-        <h2 className="mt-1 text-3xl font-semibold text-white">IBM Quantum + QOBLIB Verification</h2>
-        <p className="mt-2 text-xs text-emerald-400/90">
-          Aligned with{' '}
-          <a href="https://www.ibm.com/quantum/blog/ibm-hbcu-quantum-center" target="_blank" rel="noreferrer" className="underline hover:text-emerald-300">
-            IBM-HBCU Quantum Center
-          </a>{' '}
-          &{' '}
-          <a href="https://www.quantumglobalgroup.io" target="_blank" rel="noreferrer" className="underline hover:text-emerald-300">
-            Quantum Global Group
-          </a>{' '}
-          playbook —{' '}
-          <Link to="/workforce" className="underline hover:text-emerald-300">
-            view full curriculum →
-          </Link>
-        </p>
-        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-400">
-          Connect IBM Quantum for a hardware warmup, then run official QOBLIB portfolio QUBOs at a050 scale
-          (3,110–4,665 variables) with classical simulated annealing and compare against published ABS2/Gurobi results.
-          a200/a400 instances are available for baseline verification via ingested submissions.
-        </p>
-        {apiOnline === false ? (
-          <div className="mt-4 rounded-lg border border-amber-800/60 bg-amber-950/30 px-4 py-3 text-sm text-amber-200">
-            Local API offline. Start the lab server:{' '}
-            <code className="rounded bg-black/30 px-1">cd server && pip install -r requirements.txt && uvicorn main:app --reload --port 8000</code>
-          </div>
-        ) : apiOnline ? (
-          <p className="mt-3 text-xs text-emerald-400">Lab API connected</p>
-        ) : null}
-      </header>
+    <div>
+      <PageHeader
+        num="01"
+        title="Quantum Playground"
+        subtitle="Connect IBM Quantum for a hardware warmup, then run official QOBLIB portfolio QUBOs at a050 scale (3,110–4,665 variables) with classical simulated annealing and compare against published ABS2/Gurobi results."
+      >
+        <Link to="/workforce" className="qgg-btn">
+          CURRICULUM ↗
+        </Link>
+      </PageHeader>
+
+      <div className="qgg-page-inner space-y-8">
+        <div>
+          <p className="text-sm text-qgg-muted">
+            Aligned with{' '}
+            <a href="https://www.ibm.com/quantum/blog/ibm-hbcu-quantum-center" target="_blank" rel="noreferrer" className="qgg-link">
+              IBM-HBCU Quantum Center
+            </a>{' '}
+            &{' '}
+            <a href="https://www.quantumglobalgroup.io" target="_blank" rel="noreferrer" className="qgg-link">
+              Quantum Global Group
+            </a>
+          </p>
+          {apiOnline === false ? (
+            <div className="qgg-alert-error mt-4 text-sm">
+              Local API offline. Start:{' '}
+              <code className="font-mono text-xs">cd server; pip install -r requirements.txt; uvicorn main:app --reload --port 8000</code>
+            </div>
+          ) : apiOnline ? (
+            <p className="mt-3 font-mono text-xs uppercase text-qgg-fg">● Lab API connected</p>
+          ) : null}
+        </div>
 
       {error ? (
-        <div className="rounded-lg border border-red-900/60 bg-red-950/30 px-4 py-3 text-sm text-red-200">{error}</div>
+        <div className="qgg-alert-error px-4 py-3 text-sm">{error}</div>
       ) : null}
 
       <ParameterExplorePanel
@@ -386,41 +389,40 @@ export function LabPage() {
       />
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <section className="rounded-xl border border-slate-800 bg-[#161d27] p-6">
-          <h3 className="text-lg font-semibold text-white">1. IBM Quantum credentials</h3>
-          <p className="mt-1 text-xs text-slate-500">
+        <QggPanel num="1" title="IBM Quantum credentials">
+          <p className="text-xs text-qgg-muted">
             Token + instance CRN from{' '}
-            <a href="https://quantum.cloud.ibm.com/" target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline">
+            <a href="https://quantum.cloud.ibm.com/" target="_blank" rel="noreferrer" className="qgg-link">
               IBM Quantum Platform
             </a>
             . Stored in session only — never sent to GitHub Pages.
           </p>
           <div className="mt-4 space-y-3">
-            <label className="block text-sm text-slate-400">
+            <label className="qgg-label">
               API token
               <input
                 type="password"
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+                className="qgg-input"
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 placeholder="Paste IBM Quantum API token"
                 autoComplete="off"
               />
             </label>
-            <label className="block text-sm text-slate-400">
+            <label className="qgg-label">
               Instance CRN
               <input
                 type="text"
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-xs text-white"
+                className="qgg-input font-mono text-xs"
                 value={crn}
                 onChange={(e) => setCrn(e.target.value)}
                 placeholder="crn:v1:bluemix:public:quantum-computing:..."
               />
             </label>
-            <label className="block text-sm text-slate-400">
+            <label className="qgg-label">
               Channel
               <select
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+                className="qgg-input"
                 value={channel}
                 onChange={(e) => setChannel(e.target.value)}
               >
@@ -433,24 +435,23 @@ export function LabPage() {
               type="button"
               disabled={connecting || !token || !crn || !apiOnline}
               onClick={handleConnect}
-              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium hover:bg-cyan-500 disabled:opacity-40"
+              className="qgg-btn qgg-btn-accent"
             >
               {connecting ? 'Connecting…' : 'Test connection'}
             </button>
             {connection ? (
-              <p className="text-sm text-emerald-400">{connection.message}</p>
+              <p className="text-sm font-mono uppercase">{connection.message}</p>
             ) : null}
           </div>
-        </section>
+        </QggPanel>
 
-        <section className="rounded-xl border border-slate-800 bg-[#161d27] p-6">
-          <h3 className="text-lg font-semibold text-white">2. Run QAOA on IBM Quantum (scalable qubits)</h3>
-          <p className="mt-1 text-xs text-slate-500">
-            Ring MaxCut QAOA — increase <strong className="text-slate-300">qubits</strong> to see exponential search-space growth.
-            Use <strong className="text-slate-300">simulator</strong> up to 20 qubits; on real hardware stay at ≤12 qubits.
+        <QggPanel num="2" title="Run QAOA on IBM Quantum">
+          <p className="text-xs text-qgg-muted">
+            Ring MaxCut QAOA — increase <strong>qubits</strong> to see exponential search-space growth.
+            Use <strong>simulator</strong> up to 20 qubits; on real hardware stay at ≤12 qubits.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <label className="text-sm text-slate-400 sm:col-span-2">
+            <label className="qgg-label sm:col-span-2">
               Qubits (problem size)
               <div className="mt-2 flex items-center gap-3">
                 <input
@@ -462,13 +463,13 @@ export function LabPage() {
                   onChange={(e) => setQubits(Number(e.target.value))}
                   className="flex-1"
                 />
-                <span className="w-24 font-mono text-sm text-cyan-300">{qubits} → 2^{qubits} = {(2 ** qubits).toLocaleString()}</span>
+                <span className="w-24 font-mono text-sm">{qubits} → 2^{qubits} = {(2 ** qubits).toLocaleString()}</span>
               </div>
             </label>
-            <label className="text-sm text-slate-400">
+            <label className="qgg-label">
               Backend
               <select
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+                className="qgg-input"
                 value={backend}
                 onChange={(e) => setBackend(e.target.value)}
               >
@@ -480,22 +481,22 @@ export function LabPage() {
                 ))}
               </select>
             </label>
-            <label className="text-sm text-slate-400">
+            <label className="qgg-label">
               Shots
               <input
                 type="number"
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+                className="qgg-input"
                 value={shots}
                 min={100}
                 max={10000}
                 onChange={(e) => setShots(Number(e.target.value))}
               />
             </label>
-            <label className="text-sm text-slate-400">
+            <label className="qgg-label">
               QAOA reps
               <input
                 type="number"
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+                className="qgg-input"
                 value={reps}
                 min={1}
                 max={5}
@@ -507,42 +508,41 @@ export function LabPage() {
             type="button"
             disabled={running || !apiOnline || (backend !== 'simulator' && (!token || !crn))}
             onClick={handleRun}
-            className="mt-4 rounded-lg border border-cyan-700 px-4 py-2 text-sm text-cyan-300 hover:bg-cyan-950/40 disabled:opacity-40"
+            className="qgg-btn mt-4 disabled:opacity-40"
           >
             {running ? 'Running job…' : 'Run demo job'}
           </button>
           {runResult ? (
-            <div className="mt-4 rounded-lg bg-slate-900/60 p-3 text-xs text-slate-300">
-              <p><span className="text-slate-500">Qubits:</span> {runResult.qubits} · <span className="text-slate-500">Params:</span> {runResult.parameterCount ?? '—'}</p>
-              <p><span className="text-slate-500">Backend:</span> {runResult.backend}</p>
-              <p><span className="text-slate-500">Runtime:</span> {runResult.runtimeSec}s</p>
-              <p><span className="text-slate-500">Best bitstring:</span> <code>{runResult.bestBitstring}</code></p>
-              <p><span className="text-slate-500">Energy estimate:</span> {runResult.bestEnergyEstimate}</p>
-              <p className="mt-2 text-slate-500">{runResult.note}</p>
+            <div className="qgg-terminal mt-4 text-xs">
+              <p><span className="text-qgg-terminal-dim">Qubits:</span> {runResult.qubits} · <span className="text-qgg-terminal-dim">Params:</span> {runResult.parameterCount ?? '—'}</p>
+              <p><span className="text-qgg-terminal-dim">Backend:</span> {runResult.backend}</p>
+              <p><span className="text-qgg-terminal-dim">Runtime:</span> {runResult.runtimeSec}s</p>
+              <p><span className="text-qgg-terminal-dim">Best bitstring:</span> <code>{runResult.bestBitstring}</code></p>
+              <p><span className="text-qgg-terminal-dim">Energy estimate:</span> {runResult.bestEnergyEstimate}</p>
+              <p className="mt-2 text-qgg-terminal-dim">{runResult.note}</p>
             </div>
           ) : null}
-        </section>
+        </QggPanel>
       </div>
 
-      <section className="rounded-xl border border-indigo-900/50 bg-[#161d27] p-6">
-        <h3 className="text-lg font-semibold text-white">3. Solve official QOBLIB QUBO (a010 / a050)</h3>
-        <p className="mt-1 text-xs text-slate-500">
-          Loads compressed <code className="text-cyan-300">.qs.xz</code> UQO files from QOBLIB (710–4,665 variables).
+      <QggPanel num="3" title="Solve official QOBLIB QUBO">
+        <p className="text-xs text-qgg-muted">
+          Loads compressed <code className="font-mono">.qs.xz</code> UQO files from QOBLIB (710–4,665 variables).
           Reported objectives use QOBLIB UQO convention (ObjectiveOffset − energy) — positive values, comparable to ABS2 QUBO submissions.
           Gurobi MIP objectives in Table 6 are negative (same economic problem, different formulation sign).
-          Fetch locally: <code className="rounded bg-black/30 px-1">python scripts/fetch_qubo_files.py --folder a050_t15_s00_b020</code>
+          Fetch locally: <code className="font-mono text-xs">python scripts/fetch_qubo_files.py --folder a050_t15_s00_b020</code>
         </p>
         {quboCatalog ? (
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="mt-2 text-xs text-qgg-muted">
             Catalog: {quboCatalog.entries.length} UQO files ·{' '}
             {quboCatalog.localAvailableCount ?? quboCatalog.entries.filter((e) => e.localAvailable).length} downloaded locally
           </p>
         ) : null}
         <div className="mt-4 flex flex-wrap items-end gap-4">
-          <label className="text-sm text-slate-400">
+          <label className="qgg-label">
             Asset scale
             <select
-              className="mt-1 block rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+              className="qgg-input block"
               value={assetFilter}
               onChange={(e) => setAssetFilter(e.target.value as '50' | '10' | 'all')}
             >
@@ -551,10 +551,10 @@ export function LabPage() {
               <option value="all">All</option>
             </select>
           </label>
-          <label className="text-sm text-slate-400">
+          <label className="qgg-label">
             Instance
             <select
-              className="mt-1 block min-w-[220px] rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+              className="qgg-input block min-w-[220px]"
               value={instanceKey}
               onChange={(e) => setInstanceKey(e.target.value)}
             >
@@ -565,10 +565,10 @@ export function LabPage() {
               ))}
             </select>
           </label>
-          <label className="text-sm text-slate-400">
+          <label className="qgg-label">
             Risk λ
             <select
-              className="mt-1 block rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+              className="qgg-input block"
               value={quboEntryIdx}
               onChange={(e) => setQuboEntryIdx(Number(e.target.value))}
             >
@@ -580,11 +580,11 @@ export function LabPage() {
               ))}
             </select>
           </label>
-          <label className="text-sm text-slate-400">
+          <label className="qgg-label">
             SA iterations
             <input
               type="number"
-              className="mt-1 block w-28 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+              className="qgg-input block w-28"
               value={quboIterations}
               min={500}
               max={50000}
@@ -595,64 +595,63 @@ export function LabPage() {
             type="button"
             disabled={solvingQubo || !apiOnline || !selectedQubo?.localAvailable}
             onClick={handleSolveQubo}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500 disabled:opacity-40"
+            className="qgg-btn qgg-btn-accent disabled:opacity-40"
           >
             {solvingQubo ? 'Solving…' : 'Run SA & record'}
           </button>
-          <p className="w-full text-xs text-slate-500">
-            Tip: start with <strong className="text-slate-300">a010</strong> (710 vars), then move to <strong className="text-slate-300">a050</strong> (3,110–4,665 vars). Use the λ sweep button above to compare all risk levels on one instance.
+          <p className="w-full text-xs text-qgg-muted">
+            Tip: start with <strong>a010</strong> (710 vars), then move to <strong>a050</strong> (3,110–4,665 vars). Use the λ sweep button above to compare all risk levels on one instance.
           </p>
         </div>
         {selectedQubo && !selectedQubo.localAvailable ? (
-          <p className="mt-3 text-xs text-amber-300">
+          <p className="mt-3 text-xs">
             QUBO file not on disk. Run{' '}
-            <code className="rounded bg-black/30 px-1">python scripts/fetch_qubo_files.py --folder {selectedQubo.folder}</code>
+            <code className="font-mono">python scripts/fetch_qubo_files.py --folder {selectedQubo.folder}</code>
           </p>
         ) : null}
         {quboResult ? (
           <div className="mt-4 grid gap-4 md:grid-cols-3">
-            <div className="rounded-lg bg-slate-900/50 p-3 text-sm">
-              <p className="text-slate-500">Your SA objective</p>
-              <p className="font-mono text-lg text-indigo-300">{quboResult.objective.toLocaleString()}</p>
-              <p className="text-xs text-slate-500">
+            <div className="qgg-stat-box">
+              <p>Your SA objective</p>
+              <p className="font-mono text-lg">{quboResult.objective.toLocaleString()}</p>
+              <p className="text-xs text-qgg-muted">
                 {quboResult.numVariables.toLocaleString()} vars · {quboResult.runtimeSec}s (+ {quboResult.loadSec}s load)
               </p>
             </div>
             {quboResult.verification ? (
-              <div className="rounded-lg bg-slate-900/50 p-3 text-sm">
-                <p className="text-slate-500">{quboResult.verification.referenceSolver} reference (QUBO)</p>
-                <p className="font-mono text-lg text-cyan-300">
+              <div className="qgg-stat-box">
+                <p>{quboResult.verification.referenceSolver} reference (QUBO)</p>
+                <p className="font-mono text-lg">
                   {quboResult.verification.referenceObjective.toLocaleString()}
                 </p>
-                <p className="text-xs text-slate-500">Gap {quboResult.verification.gapPct}%</p>
+                <p className="text-xs text-qgg-muted">Gap {quboResult.verification.gapPct}%</p>
                 {quboResult.verification.gurobiObjective != null ? (
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="text-xs text-qgg-muted">
                     Gurobi MIP (same λ): {quboResult.verification.gurobiObjective.toLocaleString()}
                   </p>
                 ) : null}
               </div>
             ) : null}
-            <div className="rounded-lg bg-slate-900/50 p-3 text-xs text-slate-400">{quboResult.note}</div>
+            <div className="qgg-stat-box text-xs text-qgg-muted">{quboResult.note}</div>
           </div>
         ) : null}
-      </section>
+      </QggPanel>
 
       {largeInstanceBaselines.length > 0 ? (
-        <section className="rounded-xl border border-slate-800 bg-[#161d27] p-6">
-          <h3 className="text-lg font-semibold text-white">a200 / a400 — QOBLIB baseline verification</h3>
-          <p className="mt-1 text-xs text-slate-500">
+        <QggPanel num="—" title="a200 / a400 baseline verification">
+          <p className="text-xs text-qgg-muted">
             Full QUBO files for these instances are generated via Zimpl in QOBLIB; this dashboard verifies against ingested
             ABS2 submission records and live price/covariance data on the Portfolio page.
           </p>
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             {largeInstanceBaselines.map((inst) => (
-              <div key={inst.instanceKey} className="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-                <p className="font-mono text-sm text-cyan-300">{inst.instanceKey}</p>
-                <p className="mt-1 text-xs text-slate-500">
+              <div key={inst.instanceKey} className="border border-qgg bg-qgg-paper p-4">
+                <p className="font-mono text-sm">{inst.instanceKey}</p>
+                <p className="text-xs text-qgg-muted">
                   {inst.assets} assets · {inst.periods} periods · ~{inst.variables.toLocaleString()} QUBO variables
                 </p>
                 {inst.abs2.length > 0 ? (
-                  <ul className="mt-3 space-y-1 text-xs text-slate-400">
+                  <ul className="mt-3 space-y-1 text-xs text-qgg-muted">
                     {inst.abs2.map((s) => (
                       <li key={s.problemId} className="font-mono">
                         {s.problemId}: {s.objective?.toLocaleString() ?? '—'} ({s.totalRuntimeSec}s)
@@ -660,24 +659,23 @@ export function LabPage() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="mt-2 text-xs text-slate-600">No ABS2 submissions ingested for this key yet.</p>
+                  <p className="mt-2 text-xs text-qgg-muted">No ABS2 submissions ingested for this key yet.</p>
                 )}
               </div>
             ))}
           </div>
-        </section>
+        </QggPanel>
       ) : null}
 
-      <section className="rounded-xl border border-slate-800 bg-[#161d27] p-6">
-        <h3 className="text-lg font-semibold text-white">4. Verify against QOBLIB reference (Paper Table 6)</h3>
-        <p className="mt-1 text-xs text-slate-500">
-          Instance <code className="text-cyan-300">po_a050_t15_s00</code> — paper Table 6 (Gurobi 12 vs ABS2 on MIP/BQP vs QUBO).
+      <QggPanel num="4" title="Verify against QOBLIB reference">
+        <p className="text-xs text-qgg-muted">
+          Instance <code className="font-mono">po_a050_t15_s00</code> — paper Table 6 (Gurobi 12 vs ABS2 on MIP/BQP vs QUBO).
         </p>
         <div className="mt-4 flex flex-wrap items-end gap-4">
-          <label className="text-sm text-slate-400">
+          <label className="qgg-label">
             Risk λ
             <select
-              className="mt-1 block rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+              className="qgg-input block"
               value={selectedLambdaIdx}
               onChange={(e) => setSelectedLambdaIdx(Number(e.target.value))}
             >
@@ -688,21 +686,21 @@ export function LabPage() {
               ))}
             </select>
           </label>
-          <label className="text-sm text-slate-400">
+          <label className="qgg-label">
             Your objective (minimize)
             <input
               type="text"
-              className="mt-1 block w-48 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm text-white"
+              className="qgg-input block w-48 font-mono"
               value={yourObjective}
               onChange={(e) => setYourObjective(e.target.value)}
               placeholder="-386990"
             />
           </label>
-          <label className="text-sm text-slate-400">
+          <label className="qgg-label">
             Your runtime (s)
             <input
               type="text"
-              className="mt-1 block w-32 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+              className="qgg-input block w-32"
               value={yourRuntime}
               onChange={(e) => setYourRuntime(e.target.value)}
               placeholder="3600"
@@ -712,7 +710,7 @@ export function LabPage() {
             type="button"
             disabled={verifying || !apiOnline}
             onClick={handleVerify}
-            className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium hover:bg-emerald-600 disabled:opacity-40"
+            className="qgg-btn qgg-btn-accent disabled:opacity-40"
           >
             {verifying ? 'Scoring…' : 'Compare to Gurobi reference'}
           </button>
@@ -720,70 +718,70 @@ export function LabPage() {
 
         {selectedRow ? (
           <div className="mt-4 grid gap-4 md:grid-cols-3">
-            <div className="rounded-lg bg-slate-900/50 p-3 text-sm">
-              <p className="text-slate-500">Gurobi objective</p>
-              <p className="font-mono text-lg text-cyan-300">{selectedRow.gurobiObjective.toLocaleString()}</p>
-              <p className="text-xs text-slate-500">{selectedRow.gurobiRuntimeSec}s · gap {selectedRow.gurobiGapPct}%</p>
+            <div className="qgg-stat-box">
+              <p>Gurobi objective</p>
+              <p className="font-mono text-lg">{selectedRow.gurobiObjective.toLocaleString()}</p>
+              <p className="text-xs text-qgg-muted">{selectedRow.gurobiRuntimeSec}s · gap {selectedRow.gurobiGapPct}%</p>
             </div>
-            <div className="rounded-lg bg-slate-900/50 p-3 text-sm">
-              <p className="text-slate-500">ABS2 objective</p>
-              <p className="font-mono text-lg text-indigo-300">{selectedRow.abs2Objective.toLocaleString()}</p>
-              <p className="text-xs text-slate-500">{selectedRow.abs2RuntimeSec}s · gap {selectedRow.abs2GapPct}%</p>
+            <div className="qgg-stat-box">
+              <p>ABS2 objective</p>
+              <p className="font-mono text-lg">{selectedRow.abs2Objective.toLocaleString()}</p>
+              <p className="text-xs text-qgg-muted">{selectedRow.abs2RuntimeSec}s · gap {selectedRow.abs2GapPct}%</p>
             </div>
             {verifyResult ? (
-              <div className="rounded-lg bg-slate-900/50 p-3 text-sm">
-                <p className="text-slate-500">Your score vs Gurobi</p>
-                <p className="text-lg capitalize text-white">{verifyResult.verdict.replace(/_/g, ' ')}</p>
-                <p className="text-xs text-slate-400">Gap {verifyResult.gapPct}% — {verifyResult.message}</p>
+              <div className="qgg-stat-box">
+                <p>Your score vs Gurobi</p>
+                <p className="text-lg capitalize">{verifyResult.verdict.replace(/_/g, ' ')}</p>
+                <p className="text-xs text-qgg-muted">Gap {verifyResult.gapPct}% — {verifyResult.message}</p>
               </div>
             ) : null}
           </div>
         ) : null}
 
-        <div className="mt-6 h-72">
+        <div className="qgg-chart mt-6 h-72">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={comparisonChart}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="solver" tick={{ fill: '#94a3b8', fontSize: 11 }} />
-              <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} label={{ value: 'Objective value', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 11 }} />
-              <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={QGG_CHART.grid} />
+              <XAxis dataKey="solver" tick={{ fill: QGG_CHART.tick, fontSize: 11 }} />
+              <YAxis tick={{ fill: QGG_CHART.tick, fontSize: 11 }} label={{ value: 'Objective value', angle: -90, position: 'insideLeft', fill: QGG_CHART.tick, fontSize: 11 }} />
+              <Tooltip contentStyle={QGG_CHART.tooltip} />
               <Legend />
-              <Bar dataKey="objective" name="Best objective" fill="#22d3ee" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="objective" name="Best objective" fill={QGG_CHART.line[0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </section>
+      </QggPanel>
 
       {abs2ForInstance.length > 0 ? (
-        <section className="rounded-xl border border-slate-800 bg-[#161d27] p-6">
-          <h3 className="text-lg font-semibold text-white">QOBLIB submission records (ABS2)</h3>
-          <p className="mt-1 text-xs text-slate-500">258 portfolio submissions ingested from QOBLIB — showing ABS2 runs for the paper reference family.</p>
+        <QggPanel title="QOBLIB submission records (ABS2)">
+          <p className="text-xs text-qgg-muted">258 portfolio submissions ingested from QOBLIB — showing ABS2 runs for the paper reference family.</p>
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-xs">
+            <table className="qgg-table min-w-[720px] text-xs">
               <thead>
-                <tr className="border-b border-slate-700 text-slate-500">
-                  <th className="py-2 pr-3">Problem ID</th>
-                  <th className="py-2 pr-3">Objective</th>
-                  <th className="py-2 pr-3">Runtime (s)</th>
-                  <th className="py-2 pr-3">GPU (s)</th>
-                  <th className="py-2">Hardware</th>
+                <tr>
+                  <th>Problem ID</th>
+                  <th>Objective</th>
+                  <th>Runtime (s)</th>
+                  <th>GPU (s)</th>
+                  <th>Hardware</th>
                 </tr>
               </thead>
               <tbody>
                 {abs2ForInstance.map((row) => (
-                  <tr key={row.problemId} className="border-b border-slate-800 text-slate-300">
-                    <td className="py-2 pr-3 font-mono">{row.problemId}</td>
-                    <td className="py-2 pr-3 font-mono text-cyan-300">{row.objective?.toLocaleString() ?? '—'}</td>
-                    <td className="py-2 pr-3">{row.totalRuntimeSec ?? '—'}</td>
-                    <td className="py-2 pr-3">{row.gpuRuntimeSec ?? '—'}</td>
-                    <td className="py-2 truncate max-w-xs">{row.hardware}</td>
+                  <tr key={row.problemId}>
+                    <td className="font-mono">{row.problemId}</td>
+                    <td className="font-mono">{row.objective?.toLocaleString() ?? '—'}</td>
+                    <td>{row.totalRuntimeSec ?? '—'}</td>
+                    <td>{row.gpuRuntimeSec ?? '—'}</td>
+                    <td className="max-w-xs truncate">{row.hardware}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </section>
+        </QggPanel>
       ) : null}
+      </div>
     </div>
   )
 }

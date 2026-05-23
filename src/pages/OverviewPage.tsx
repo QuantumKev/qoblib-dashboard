@@ -1,104 +1,177 @@
 import { Link } from 'react-router-dom'
+import { QggTerminal } from '../components/ui/QggTerminal'
 import { PAPER } from '../data/qoblibData'
 
-type StatProps = { label: string; value: string; hint?: string }
+const QUICK = [
+  { label: 'RUN', sub: 'Real QPUs', to: '/lab' },
+  { label: 'BUILD', sub: 'Open Projects', to: '/decathlon' },
+  { label: 'LEARN', sub: 'Resources', to: '/learn' },
+  { label: 'CONNECT', sub: 'Workforce', to: '/workforce' },
+] as const
 
-function Stat({ label, value, hint }: StatProps) {
-  return (
-    <div className="rounded-xl border border-slate-800 bg-[#161d27] p-4">
-      <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold text-white">{value}</p>
-      {hint ? <p className="mt-1 text-xs text-slate-400">{hint}</p> : null}
-    </div>
-  )
-}
+const GRID_SECTIONS = [
+  {
+    num: '01',
+    title: 'QUANTUM PLAYGROUND',
+    dark: true,
+    to: '/lab',
+    body: 'Run on real QPUs in minutes. Connect IBM token + CRN, scale qubits, benchmark against QOBLIB portfolio QUBOs.',
+    cta: 'GO TO PLAYGROUND ↗',
+    terminal: true,
+  },
+  {
+    num: '02',
+    title: 'FEATURED PROJECTS',
+    dark: false,
+    to: '/decathlon',
+    body: 'QOBLIB Intractable Decathlon — 10 optimization problem classes with published baselines.',
+    items: ['Portfolio Optimization [FIN]', 'Network Design [QUBO]', 'Vehicle Routing [LOG]', 'Steiner Tree [VLSI]'],
+    cta: 'VIEW PROJECTS ↗',
+  },
+  {
+    num: '03',
+    title: 'SERVICES',
+    dark: false,
+    to: '/workforce',
+    body: 'Workforce development aligned with IBM-HBCU Quantum Center and industry delivery playbooks.',
+    items: ['Strategy', 'Execution', 'Capability'],
+    cta: 'WORKFORCE PROGRAM ↗',
+  },
+  {
+    num: '04',
+    title: 'PROCESS',
+    dark: false,
+    to: '/workforce',
+    body: 'Define → fit check → pilot → benchmark → report → enable team.',
+    items: ['01 Define outcome', '02 Fit check', '03 Pilot design', '04 Build & benchmark', '05 Report', '06 Enable'],
+    cta: 'SEE PROCESS ↗',
+  },
+  {
+    num: '05',
+    title: 'QOBLIB BENCHMARK',
+    dark: false,
+    to: '/portfolio',
+    body: PAPER.title,
+    items: ['32 portfolio instances', '258 submission records', 'Paper Table 6 verification'],
+    cta: 'PORTFOLIO DEEP DIVE ↗',
+  },
+  {
+    num: '06',
+    title: 'START PRESENTING',
+    dark: false,
+    to: '/present',
+    body: 'Fullscreen deck with IBM × QGG co-branding and speaker notes for partner demos.',
+    cta: 'OPEN PRESENT ↗',
+  },
+] as const
 
 export function OverviewPage() {
   return (
-    <div className="space-y-8">
-      <header>
-        <p className="text-sm text-cyan-400">Presentation dashboard</p>
-        <h2 className="mt-1 max-w-3xl text-3xl font-semibold text-white">{PAPER.title}</h2>
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-300">
-          A team from IBM Quantum, ZIB Berlin, Purdue, and others created a shared test suite to answer one question:
-          <span className="text-white"> can quantum computers actually beat classical computers on hard optimization problems?</span>
-          {' '}Instead of vague claims, they published 10 problem types, real datasets, and baseline scores everyone can reproduce.
-        </p>
-      </header>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat label="Problem classes" value="10" hint="The “Intractable Decathlon”" />
-        <Stat label="Variable range" value="100 – 100k" hint="Small enough for near-term quantum hardware" />
-        <Stat label="Open library" value="QOBLIB" hint="Instances, models, solutions, checkers" />
-        <Stat label="Your focus" value="Portfolio" hint="Problem #06 — finance benchmark" />
-      </div>
-
-      <section className="rounded-xl border border-slate-800 bg-[#161d27] p-6">
-        <h3 className="text-lg font-semibold text-white">The big idea in one minute</h3>
-        <div className="mt-4 grid gap-6 md:grid-cols-3">
+    <div>
+      {/* Hero */}
+      <section className="border-b border-qgg bg-qgg-paper px-4 py-10 lg:px-6 lg:py-16">
+        <div className="mx-auto grid max-w-[1400px] gap-8 lg:grid-cols-[1fr_220px]">
           <div>
-            <p className="text-sm font-medium text-cyan-300">1. Pick hard problems</p>
-            <p className="mt-2 text-sm leading-relaxed text-slate-400">
-              Ten combinatorial problems from finance, logistics, chip design, and more — each hard for classical solvers at modest sizes.
+            <h1 className="qgg-display text-4xl uppercase leading-[1.05] tracking-tight lg:text-6xl">
+              Building quantum systems for the post-classical era.
+            </h1>
+            <p className="mt-6 max-w-2xl text-sm leading-relaxed text-qgg-muted lg:text-base">
+              QOBLIB workforce lab by Quantum Global Group — interactive benchmark dashboard for portfolio
+              optimization (#06). Students connect IBM Quantum, run pilots, and verify results against published
+              QOBLIB submissions the same way industry teams do.
             </p>
+            <div className="mt-8 flex flex-wrap gap-6">
+              {QUICK.map(({ label, sub, to }) => (
+                <Link key={label} to={to} className="group font-mono text-xs uppercase tracking-wider">
+                  <span className="font-bold underline decoration-qgg-accent decoration-2 underline-offset-4 group-hover:bg-qgg-accent">
+                    {label}
+                  </span>{' '}
+                  <span className="text-qgg-muted">{sub}</span>
+                  <span className="ml-1">↗</span>
+                </Link>
+              ))}
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium text-cyan-300">2. Publish fair benchmarks</p>
-            <p className="mt-2 text-sm leading-relaxed text-slate-400">
-              Same instances, same verification tools, standardized reporting. Classical MIP solvers and quantum QUBO solvers can both compete.
-            </p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-cyan-300">3. Track progress over time</p>
-            <p className="mt-2 text-sm leading-relaxed text-slate-400">
-              As quantum hardware improves, researchers rerun the same tests. Improvements become measurable instead of anecdotal.
-            </p>
-          </div>
+          <nav className="hidden border border-qgg bg-qgg-paper p-4 lg:block">
+            <ul className="space-y-2 font-mono text-[11px] uppercase tracking-wider">
+              {GRID_SECTIONS.map((s) => (
+                <li key={s.num}>
+                  <Link to={s.to} className="flex justify-between border-b border-qgg py-2 hover:bg-qgg-accent">
+                    <span>
+                      {s.num} {s.title.split(' ')[0]}
+                    </span>
+                    <span>→</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-800 bg-[#161d27] p-6">
-        <h3 className="text-lg font-semibold text-white">Why this matters for portfolio optimization</h3>
-        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-400">
-          Portfolio optimization sounds simple — pick stocks to maximize return and minimize risk. Real portfolios add transaction fees,
-          multi-day rebalancing, borrowing costs for short positions, and capital limits. That makes the problem NP-hard. Quantum researchers
-          have studied simplified versions; QOBLIB provides a rigorous, reproducible benchmark using real S&P 500 data so comparisons are honest.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          {['Multi-period', 'Transaction costs', 'Short selling', 'Real market data', 'Binary decisions'].map((tag) => (
-            <span key={tag} className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
-              {tag}
-            </span>
+      {/* Stats strip */}
+      <section className="grid grid-cols-2 border-b border-qgg lg:grid-cols-4">
+        {[
+          { label: 'Problem classes', value: '10' },
+          { label: 'Variables', value: '100–100k' },
+          { label: 'Library', value: 'QOBLIB' },
+          { label: 'Focus', value: '#06' },
+        ].map((s) => (
+          <div key={s.label} className="border-r border-qgg px-4 py-5 last:border-r-0">
+            <p className="font-mono text-[10px] uppercase text-qgg-muted">{s.label}</p>
+            <p className="qgg-stat-value mt-1">{s.value}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* Main grid — matches QGG site layout */}
+      <section className="mx-auto max-w-[1400px] border-x border-qgg">
+        <div className="qgg-grid-home">
+          {GRID_SECTIONS.map((section) => (
+            <article
+              key={section.num}
+              className={`flex min-h-[280px] flex-col p-6 lg:p-8 ${section.dark ? 'bg-qgg-terminal text-[#f2f2ec]' : 'bg-qgg-paper'}`}
+            >
+              <p className="font-mono text-xs text-qgg-muted">
+                {section.num} / <span className={section.dark ? 'text-[#888]' : ''}>{section.title}</span>
+              </p>
+              <p className={`mt-4 flex-1 text-sm leading-relaxed ${section.dark ? 'text-[#ccc]' : 'text-qgg-muted'}`}>
+                {section.body}
+              </p>
+              {'items' in section && section.items ? (
+                <ul className="mt-4 space-y-1 font-mono text-[11px]">
+                  {section.items.map((item) => (
+                    <li key={item} className="flex justify-between border-b border-current/20 py-1">
+                      <span>{item}</span>
+                      <span>↗</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {'terminal' in section && section.terminal ? (
+                <div className="mt-4">
+                  <QggTerminal />
+                  <p className="mt-3 flex gap-3 font-mono text-[10px] uppercase text-[#888]">
+                    <span>IBM</span>
+                    <span>Rigetti</span>
+                    <span>IonQ</span>
+                    <span>AWS</span>
+                  </p>
+                </div>
+              ) : null}
+              <Link
+                to={section.to}
+                className={`qgg-btn mt-6 w-fit ${section.dark ? 'qgg-btn-accent border-[#f2f2ec] text-qgg-fg' : 'qgg-btn-accent'}`}
+              >
+                {section.cta}
+              </Link>
+            </article>
           ))}
         </div>
       </section>
 
-      <section className="rounded-xl border border-emerald-900/40 bg-emerald-950/15 p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-emerald-400">Workforce development</p>
-            <h3 className="mt-1 text-lg font-semibold text-white">IBM HBCU Quantum Center · Quantum Global Group playbook</h3>
-            <p className="mt-2 max-w-2xl text-sm text-slate-400">
-              Students duplicate the same define → pilot → benchmark → present workflow industry teams use — on QOBLIB
-              portfolio #06 with IBM Quantum cloud jobs and QOBLIB verification charts.
-            </p>
-          </div>
-          <Link
-            to="/workforce"
-            className="shrink-0 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium hover:bg-emerald-600"
-          >
-            Open workforce program →
-          </Link>
-        </div>
-      </section>
-
-      <section className="rounded-xl border border-amber-900/40 bg-amber-950/20 p-6">
-        <h3 className="text-lg font-semibold text-amber-200">Important nuance</h3>
-        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-amber-100/80">
-          This paper does <em>not</em> claim quantum computers already win. It sets up the race. Classical solvers like Gurobi still find better
-          final solutions on portfolio instances — but quantum-oriented QUBO solvers like ABS2 sometimes reach good answers much faster.
-          That tradeoff is exactly what the dashboard visualizes.
-        </p>
+      <section className="border-t border-qgg bg-qgg-accent px-4 py-3 text-center font-mono text-[10px] uppercase tracking-widest lg:text-xs">
+        Question everything. Compute beyond. · IBM-HBCU Quantum Center · {PAPER.arxiv}
       </section>
     </div>
   )

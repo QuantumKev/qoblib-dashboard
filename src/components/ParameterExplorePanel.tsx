@@ -11,6 +11,8 @@ import {
   YAxis,
   ZAxis,
 } from 'recharts'
+import { QGG_CHART } from '../chartTheme'
+import { QggPanel } from './ui/QggPanel'
 import type { ExploreRunRecord, IBMRunResponse, LambdaSweepRow } from '../types/lab'
 import { PORTFOLIO_INSTANCES } from '../data/qoblibData'
 
@@ -99,64 +101,53 @@ export function ParameterExplorePanel({
   }))
 
   return (
-    <section className="rounded-xl border border-emerald-900/40 bg-[#161d27] p-6">
+    <QggPanel num="EXPLORE" title="Parameter exploration">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-sm text-emerald-400">Student parameter lab</p>
-          <h3 className="mt-1 text-lg font-semibold text-white">Explore how changing variables affects results</h3>
-          <p className="mt-2 max-w-3xl text-xs text-slate-500">
-            Increase qubits for quantum demos (section 2) or assets/λ for QOBLIB QUBOs (section 3). Record runs and use
-            sweeps to build comparison charts. Full portfolio instances need thousands of qubits — use QAOA to learn
-            scaling laws, QUBO sweeps for real finance benchmarks.
-          </p>
-        </div>
+        <p className="max-w-3xl text-xs text-qgg-muted">
+          Increase qubits for quantum demos or assets/λ for QOBLIB QUBOs. Record runs and use sweeps to build comparison
+          charts.
+        </p>
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            disabled={sweepingQubits}
-            onClick={onSweepQubits}
-            className="rounded-lg bg-cyan-700 px-3 py-2 text-xs font-medium hover:bg-cyan-600 disabled:opacity-40"
-          >
-            {sweepingQubits ? 'Sweeping qubits…' : 'QAOA qubit sweep (sim)'}
+          <button type="button" disabled={sweepingQubits} onClick={onSweepQubits} className="qgg-btn qgg-btn-accent disabled:opacity-40">
+            {sweepingQubits ? 'SWEEPING…' : 'QAOA QUBIT SWEEP'}
           </button>
           <button
             type="button"
             disabled={sweepingLambda || !canSweepLambda}
             onClick={onSweepLambda}
-            className="rounded-lg bg-indigo-700 px-3 py-2 text-xs font-medium hover:bg-indigo-600 disabled:opacity-40"
+            className="qgg-btn disabled:opacity-40"
           >
-            {sweepingLambda ? 'Sweeping λ…' : `λ sweep (${instanceKey})`}
+            {sweepingLambda ? 'SWEEPING…' : `λ SWEEP (${instanceKey})`}
           </button>
           {runs.length > 0 ? (
-            <button type="button" onClick={onClear} className="rounded-lg border border-slate-600 px-3 py-2 text-xs text-slate-400">
-              Clear log
+            <button type="button" onClick={onClear} className="qgg-btn">
+              CLEAR LOG
             </button>
           ) : null}
         </div>
       </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-6 grid gap-0 border border-qgg md:grid-cols-2 lg:grid-cols-3">
         {PARAM_GUIDE.map((g) => (
-          <div key={g.knob} className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 text-xs">
-            <p className="font-medium text-white">{g.knob}</p>
-            <p className="mt-1 text-slate-400">{g.increases}</p>
-            <p className="mt-2 text-emerald-400/90">Try: {g.studentTry}</p>
+          <div key={g.knob} className="border-b border-qgg bg-qgg-paper p-3 text-xs md:border-r">
+            <p className="font-semibold">{g.knob}</p>
+            <p className="mt-1 text-qgg-muted">{g.increases}</p>
+            <p className="mt-2">Try: {g.studentTry}</p>
           </div>
         ))}
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
         <div>
-          <p className="text-sm font-medium text-white">QOBLIB problem size (Table 5)</p>
-          <p className="text-xs text-slate-500">Binary variables vs benchmark instance — why a400 is “intractable”</p>
-          <div className="mt-3 h-56">
+          <p className="qgg-section-title text-xs">QOBLIB problem size (Table 5)</p>
+          <div className="qgg-chart mt-3 h-56">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={scaleChart}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="label" tick={{ fill: '#94a3b8', fontSize: 10 }} angle={-25} textAnchor="end" height={50} />
-                <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} scale="log" domain={[500, 50000]} />
-                <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} />
-                <Line type="monotone" dataKey="variables" name="QUBO variables" stroke="#34d399" strokeWidth={2} dot />
+                <CartesianGrid strokeDasharray="3 3" stroke={QGG_CHART.grid} />
+                <XAxis dataKey="label" tick={{ fill: QGG_CHART.tick, fontSize: 10 }} angle={-25} textAnchor="end" height={50} />
+                <YAxis tick={{ fill: QGG_CHART.tick, fontSize: 11 }} scale="log" domain={[500, 50000]} />
+                <Tooltip contentStyle={QGG_CHART.tooltip} />
+                <Line type="monotone" dataKey="variables" name="QUBO variables" stroke={QGG_CHART.line[0]} strokeWidth={2} dot />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -164,17 +155,16 @@ export function ParameterExplorePanel({
 
         {qubitChart.length > 0 ? (
           <div>
-            <p className="text-sm font-medium text-white">QAOA qubit sweep — runtime vs size</p>
-            <p className="text-xs text-slate-500">Combinatorial search space 2ⁿ grows exponentially</p>
-            <div className="mt-3 h-56">
+            <p className="qgg-section-title text-xs">QAOA qubit sweep</p>
+            <div className="qgg-chart mt-3 h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                  <XAxis type="number" dataKey="qubits" name="Qubits" tick={{ fill: '#94a3b8', fontSize: 11 }} />
-                  <YAxis type="number" dataKey="runtime" name="Runtime (s)" tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={QGG_CHART.grid} />
+                  <XAxis type="number" dataKey="qubits" name="Qubits" tick={{ fill: QGG_CHART.tick, fontSize: 11 }} />
+                  <YAxis type="number" dataKey="runtime" name="Runtime (s)" tick={{ fill: QGG_CHART.tick, fontSize: 11 }} />
                   <ZAxis type="number" dataKey="searchSpace" range={[60, 400]} />
-                  <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} />
-                  <Scatter name="QAOA runs" data={qubitChart} fill="#22d3ee" />
+                  <Tooltip contentStyle={QGG_CHART.tooltip} />
+                  <Scatter name="QAOA runs" data={qubitChart} fill={QGG_CHART.line[0]} />
                 </ScatterChart>
               </ResponsiveContainer>
             </div>
@@ -183,25 +173,18 @@ export function ParameterExplorePanel({
 
         {lambdaChart.length > 0 ? (
           <div className="xl:col-span-2">
-            <p className="text-sm font-medium text-white">λ sweep — objective & runtime</p>
-            <p className="text-xs text-slate-500">Same instance, varying risk aversion (classical SA)</p>
-            <div className="mt-3 h-56">
+            <p className="qgg-section-title text-xs">λ sweep — objective & runtime</p>
+            <div className="qgg-chart mt-3 h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={lambdaChart}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                  <XAxis
-                    dataKey="lambda"
-                    tick={{ fill: '#94a3b8', fontSize: 11 }}
-                    scale="log"
-                    domain={['auto', 'auto']}
-                    tickFormatter={(v) => String(v)}
-                  />
-                  <YAxis yAxisId="obj" tick={{ fill: '#94a3b8', fontSize: 11 }} />
-                  <YAxis yAxisId="rt" orientation="right" tick={{ fill: '#64748b', fontSize: 11 }} />
-                  <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={QGG_CHART.grid} />
+                  <XAxis dataKey="lambda" tick={{ fill: QGG_CHART.tick, fontSize: 11 }} scale="log" domain={['auto', 'auto']} tickFormatter={(v) => String(v)} />
+                  <YAxis yAxisId="obj" tick={{ fill: QGG_CHART.tick, fontSize: 11 }} />
+                  <YAxis yAxisId="rt" orientation="right" tick={{ fill: QGG_CHART.tick, fontSize: 11 }} />
+                  <Tooltip contentStyle={QGG_CHART.tooltip} />
                   <Legend />
-                  <Line yAxisId="obj" type="monotone" dataKey="objective" name="SA objective" stroke="#818cf8" dot />
-                  <Line yAxisId="rt" type="monotone" dataKey="runtime" name="Runtime (s)" stroke="#fbbf24" dot />
+                  <Line yAxisId="obj" type="monotone" dataKey="objective" name="SA objective" stroke={QGG_CHART.line[1]} dot />
+                  <Line yAxisId="rt" type="monotone" dataKey="runtime" name="Runtime (s)" stroke={QGG_CHART.line[2]} dot />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -210,26 +193,26 @@ export function ParameterExplorePanel({
 
         {runChart.length > 0 ? (
           <div className="xl:col-span-2">
-            <p className="text-sm font-medium text-white">Your recorded runs</p>
+            <p className="qgg-section-title text-xs">Your recorded runs</p>
             <div className="mt-3 overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left text-xs">
+              <table className="qgg-table min-w-[640px] text-xs">
                 <thead>
-                  <tr className="border-b border-slate-700 text-slate-500">
-                    <th className="py-2 pr-3">Label</th>
-                    <th className="py-2 pr-3">Variables</th>
-                    <th className="py-2 pr-3">Runtime</th>
-                    <th className="py-2 pr-3">Objective</th>
-                    <th className="py-2">Gap %</th>
+                  <tr>
+                    <th>Label</th>
+                    <th>Variables</th>
+                    <th>Runtime</th>
+                    <th>Objective</th>
+                    <th>Gap %</th>
                   </tr>
                 </thead>
                 <tbody>
                   {runs.map((r) => (
-                    <tr key={r.id} className="border-b border-slate-800 text-slate-300">
-                      <td className="py-2 pr-3">{r.label}</td>
-                      <td className="py-2 pr-3 font-mono">{r.variables.toLocaleString()}</td>
-                      <td className="py-2 pr-3">{r.runtimeSec}s</td>
-                      <td className="py-2 pr-3 font-mono">{r.objective?.toLocaleString() ?? '—'}</td>
-                      <td className="py-2">{r.gapPct != null ? `${r.gapPct}%` : '—'}</td>
+                    <tr key={r.id}>
+                      <td>{r.label}</td>
+                      <td className="font-mono">{r.variables.toLocaleString()}</td>
+                      <td>{r.runtimeSec}s</td>
+                      <td className="font-mono">{r.objective?.toLocaleString() ?? '—'}</td>
+                      <td>{r.gapPct != null ? `${r.gapPct}%` : '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -238,6 +221,6 @@ export function ParameterExplorePanel({
           </div>
         ) : null}
       </div>
-    </section>
+    </QggPanel>
   )
 }

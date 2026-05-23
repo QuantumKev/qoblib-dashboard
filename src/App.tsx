@@ -1,5 +1,5 @@
-import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom'
-import { Sidebar } from './components/Sidebar'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { AppShell } from './components/layout/AppShell'
 import { DecathlonPage } from './pages/DecathlonPage'
 import { LabPage } from './pages/LabPage'
 import { LearnPage } from './pages/LearnPage'
@@ -9,14 +9,7 @@ import { PresentPage } from './pages/PresentPage'
 import { WorkforcePage } from './pages/WorkforcePage'
 
 function DashboardShell() {
-  return (
-    <div className="flex min-h-full">
-      <Sidebar />
-      <main className="flex-1 overflow-y-auto p-8 lg:p-10">
-        <Outlet />
-      </main>
-    </div>
-  )
+  return <AppShell />
 }
 
 export default function App() {
